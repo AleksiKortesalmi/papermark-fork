@@ -116,7 +116,7 @@ export default async function handle(
         );
       }
 
-      // console.log("links", links);
+      console.log("links", links);
       return res.status(200).json(extendedLinks);
     } catch (error) {
       log({

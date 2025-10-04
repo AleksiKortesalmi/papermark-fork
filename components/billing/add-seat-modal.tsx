@@ -3,8 +3,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { getPriceIdFromPlan } from "@/ee/stripe/functions/get-price-id-from-plan";
-import { getQuantityFromPriceId } from "@/ee/stripe/functions/get-quantity-from-plan";
 import { toast } from "sonner";
 
 import { useAnalytics } from "@/lib/analytics";
@@ -43,14 +41,6 @@ export function AddSeatModal({
   const [quantity, setQuantity] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Get the minimum quantity for the current plan
-  const priceId = getPriceIdFromPlan({
-    planSlug: userPlan,
-    isOld: isOldAccount,
-    period: isAnnualPlan ? "yearly" : "monthly",
-  });
-  const minQuantity = getQuantityFromPriceId(priceId);
-
   // Set initial quantity to 1 (adding one seat)
   useEffect(() => {
     if (open) {
@@ -59,7 +49,7 @@ export function AddSeatModal({
   }, [open]);
 
   // Calculate the total number of seats after the update
-  const totalSeatsAfterUpdate = limits ? limits.users! + quantity : quantity;
+  const totalSeatsAfterUpdate = quantity;
 
   const handleDecrement = () => {
     if (quantity > 1) {
@@ -81,7 +71,6 @@ export function AddSeatModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId,
           quantity: totalSeatsAfterUpdate,
           addSeat: true,
           // return_url: `${process.env.NEXTAUTH_URL}/settings/people?success=true`,
@@ -156,13 +145,6 @@ export function AddSeatModal({
             </Button>
           </div>
 
-          {limits && (
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              Current limit: {limits.users}{" "}
-              {limits.users === 1 ? "user" : "users"}
-            </p>
-          )}
-
           <p className="mt-2 text-center text-sm">
             Adding <span className="font-semibold">{quantity}</span>{" "}
             {quantity === 1 ? "seat" : "seats"}
@@ -172,12 +154,6 @@ export function AddSeatModal({
             Total after update: {totalSeatsAfterUpdate}{" "}
             {totalSeatsAfterUpdate === 1 ? "user" : "users"}
           </p>
-
-          {minQuantity > 1 && (
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              Minimum quantity for {planName}: {minQuantity} users
-            </p>
-          )}
         </div>
 
         <DialogFooter>

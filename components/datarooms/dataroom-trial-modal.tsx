@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { E164Number } from "libphonenumber-js";
 import { toast } from "sonner";
 import { mutate } from "swr";
@@ -23,7 +23,6 @@ import { Label } from "@/components/ui/label";
 
 import { useAnalytics } from "@/lib/analytics";
 
-import { UpgradePlanModal } from "../billing/upgrade-plan-modal";
 import { PhoneInput } from "../ui/phone-input";
 import {
   Select,
@@ -234,14 +233,6 @@ export function DataroomTrialModal({
               >
                 Access your data room
               </Button>
-
-              <div className="text-xs text-muted-foreground">
-                After the trial, upgrade to{" "}
-                <UpgradePlanModal clickedPlan={PlanEnum.Business}>
-                  <button className="underline">Papermark Business</button>
-                </UpgradePlanModal>{" "}
-                to continue using data rooms.
-              </div>
             </div>
           </DialogFooter>
         </form>

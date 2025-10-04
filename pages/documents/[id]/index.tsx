@@ -5,12 +5,11 @@ import ErrorPage from "next/error";
 import { Suspense, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 
 import { useDocumentLinks } from "@/lib/swr/use-document";
 import { useDocumentOverview } from "@/lib/swr/use-document-overview";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { AnnotationSheet } from "@/components/documents/annotations/annotation-sheet";
 import DocumentHeader from "@/components/documents/document-header";
 import { DocumentPreviewButton } from "@/components/documents/document-preview-button";
@@ -96,27 +95,14 @@ export default function DocumentPage() {
   }
 
   const AddLinkButton = () => {
-    if (!limits?.canAddLinks) {
-      return (
-        <UpgradePlanModal
-          clickedPlan={team?.isTrial ? PlanEnum.Business : PlanEnum.Pro}
-          trigger={"limit_add_link"}
-        >
-          <Button className="flex h-8 whitespace-nowrap text-xs lg:h-9 lg:text-sm">
-            Upgrade to Create Link
-          </Button>
-        </UpgradePlanModal>
-      );
-    } else {
-      return (
-        <Button
-          className="flex h-8 whitespace-nowrap text-xs lg:h-9 lg:text-sm"
-          onClick={() => setIsLinkSheetOpen(true)}
-        >
-          Create Link
-        </Button>
-      );
-    }
+    return (
+      <Button
+        className="flex h-8 whitespace-nowrap text-xs lg:h-9 lg:text-sm"
+        onClick={() => setIsLinkSheetOpen(true)}
+      >
+        Create Link
+      </Button>
+    );
   };
 
   // Show loading only for the initial overview load

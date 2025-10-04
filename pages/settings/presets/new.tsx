@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { LinkType } from "@prisma/client";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { usePlan } from "@/lib/swr/use-billing";
 import useLimits from "@/lib/swr/use-limits";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import AppLayout from "@/components/layouts/app";
 import {
   DEFAULT_LINK_PROPS,
@@ -65,14 +64,11 @@ export default function NewPreset() {
     isTrial,
   } = usePlan();
   const { limits } = useLimits();
-  const allowAdvancedLinkControls = limits
-    ? limits?.advancedLinkControlsOnPro
-    : false;
-  const allowWatermarkOnBusiness = limits?.watermarkOnBusiness ?? false;
+  const allowAdvancedLinkControls = true;
+  const allowWatermarkOnBusiness = true;
 
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
   const [trigger, setTrigger] = useState<string>("");
-  const [upgradePlan, setUpgradePlan] = useState<PlanEnum>(PlanEnum.Business);
   const [highlightItem, setHighlightItem] = useState<string[]>([]);
 
   const handleUpgradeStateChange = ({
@@ -83,9 +79,6 @@ export default function NewPreset() {
   }: LinkUpgradeOptions) => {
     setOpenUpgradeModal(state);
     setTrigger(trigger);
-    if (plan) {
-      setUpgradePlan(plan as PlanEnum);
-    }
     setHighlightItem(highlightItem || []);
   };
 
@@ -343,13 +336,6 @@ export default function NewPreset() {
           </div>
         </form>
       </main>
-      <UpgradePlanModal
-        clickedPlan={upgradePlan}
-        open={openUpgradeModal}
-        setOpen={setOpenUpgradeModal}
-        trigger={trigger}
-        highlightItem={highlightItem}
-      />
     </AppLayout>
   );
 }

@@ -73,9 +73,7 @@ export default async function handle(
             email: sessionUser.email,
             newEmail: email,
           },
-          {
-            px: expiresIn,
-          },
+          "PX", expiresIn,
         );
 
         waitUntil(

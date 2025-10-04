@@ -26,15 +26,6 @@ export async function sendLinkCreatedWebhook({
       select: { plan: true },
     });
 
-    if (
-      team?.plan === "free" ||
-      team?.plan === "pro" ||
-      team?.plan.includes("trial")
-    ) {
-      // team is not on paid plan, so we don't need to send webhooks
-      return;
-    }
-
     // Get webhooks for team
     const webhooks = await prisma.webhook.findMany({
       where: {

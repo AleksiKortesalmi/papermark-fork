@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getLimits } from "@/ee/limits/server";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
@@ -52,7 +51,7 @@ export default async function handle(
     }
 
     // Parallel fetch of core data
-    const [document, limits, featureFlags] = await Promise.all([
+    const [document, featureFlags] = await Promise.all([
       prisma.document.findUnique({
         where: {
           id: docId,
@@ -114,7 +113,6 @@ export default async function handle(
           },
         },
       }),
-      getLimits({ teamId, userId }),
       getFeatureFlags({ teamId }),
     ]);
 
@@ -152,11 +150,9 @@ export default async function handle(
         isEmpty: !hasLinks && !hasViews, // Flag for empty state optimization
       },
       limits: {
-        canAddLinks: limits?.links ? limits?.usage?.links < limits.links : true,
-        canAddDocuments: limits?.documents
-          ? limits?.usage?.documents < limits.documents
-          : true,
-        canAddUsers: limits?.users ? limits?.usage?.users < limits.users : true,
+        canAddLinks: true,
+        canAddDocuments: true,
+        canAddUsers: true,
       },
       featureFlags: {
         annotations: featureFlags.annotations,

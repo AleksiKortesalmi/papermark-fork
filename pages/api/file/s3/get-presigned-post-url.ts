@@ -54,12 +54,13 @@ export default async function handler(
     const { name, ext } = path.parse(fileName);
 
     const slugifiedName = slugify(name) + ext;
-    const key = `${team.id}/${docId}/${slugifiedName}`;
 
-    const { client, config } = await getTeamS3ClientAndConfig(team.id);
+    const { client, bucket } = await getTeamS3ClientAndConfig(team.id);
+
+    const key = `${team.id}/${docId}/${slugifiedName}`; 
 
     const putObjectCommand = new PutObjectCommand({
-      Bucket: config.bucket,
+      Bucket: bucket,
       Key: key,
       ContentType: contentType,
       ContentDisposition: `attachment; filename="${slugifiedName}"`,

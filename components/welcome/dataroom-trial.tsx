@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { E164Number } from "libphonenumber-js";
 import { motion } from "motion/react";
 import { toast } from "sonner";
@@ -23,7 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { UpgradePlanModal } from "../billing/upgrade-plan-modal";
 import { Input } from "../ui/input";
 
 export default function DataroomTrial() {
@@ -298,21 +297,6 @@ export default function DataroomTrial() {
             >
               Access your data room
             </Button>
-
-            <div className="text-xs text-muted-foreground">
-              {/* Data rooms are available on our{" "}
-              <UpgradePlanModal clickedPlan={PlanEnum.Business}>
-                <button className="underline">Business</button>
-              </UpgradePlanModal>{" "}
-              plan. <br /> */}
-              No credit card is required. After the trial, upgrade to{" "}
-              <UpgradePlanModal clickedPlan={PlanEnum.Business}>
-                <button className="underline">
-                  Papermark Business or Data Rooms
-                </button>
-              </UpgradePlanModal>{" "}
-              to continue using data rooms.
-            </div>
           </div>
         </form>
       </motion.div>

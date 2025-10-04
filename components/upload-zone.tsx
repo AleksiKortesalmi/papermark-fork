@@ -96,10 +96,7 @@ export default function UploadZone({
   const router = useRouter();
   const teamInfo = useTeam();
   const { data: session } = useSession();
-  const { limits, canAddDocuments } = useLimits();
-  const remainingDocuments = limits?.documents
-    ? limits?.documents - limits?.usage?.documents
-    : 0;
+  const { limits, canAddDocuments } = { limits:null, canAddDocuments:true };
 
   const fileSizeLimits = useMemo(
     () =>
@@ -143,11 +140,6 @@ export default function UploadZone({
 
   const onDrop = useCallback(
     async (acceptedFiles: FileWithPaths[]) => {
-      if (!canAddDocuments && acceptedFiles.length > remainingDocuments) {
-        toast.error("You have reached the maximum number of documents.");
-        return;
-      }
-
       // Validate files and separate into valid and invalid
       const validatedFiles = acceptedFiles.reduce<{
         valid: FileWithPaths[];

@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getLimits } from "@/ee/limits/server";
 import { getServerSession } from "next-auth";
 
 import { hashToken } from "@/lib/api/auth/token";
@@ -67,19 +66,6 @@ export default async function handle(
       );
       if (!isUserAdmin) {
         res.status(403).json("Only admins can send the invitation!");
-        return;
-      }
-
-      // Check if the user has reached the limit of users in the team
-      const limits = await getLimits({
-        teamId,
-        userId: (session.user as CustomUser).id,
-      });
-
-      if (limits && teamUsers.length >= limits.users) {
-        res
-          .status(403)
-          .json("You have reached the limit of users in your team");
         return;
       }
 

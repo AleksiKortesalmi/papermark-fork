@@ -84,7 +84,6 @@ export default function AgreementSection({
         enabled={enabled}
         action={handleAgreement}
         isAllowed={isAllowed}
-        requiredPlan="datarooms"
         upgradeAction={() =>
           handleUpgradeStateChange({
             state: true,

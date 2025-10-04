@@ -900,7 +900,7 @@ async function handleDataroomCreate(
       },
     });
 
-    if (createLink) {
+    // if (createLink) {
       waitUntil(
         sendLinkCreatedWebhook({
           teamId,
@@ -910,7 +910,7 @@ async function handleDataroomCreate(
           },
         }),
       );
-    }
+    // }
 
     return res.status(200).json({
       message: "Dataroom created successfully",

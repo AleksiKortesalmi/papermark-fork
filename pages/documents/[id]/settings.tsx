@@ -6,7 +6,6 @@ import { useTeam } from "@/context/team-context";
 import { toast } from "sonner";
 import useSWR, { mutate } from "swr";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import DocumentHeader from "@/components/documents/document-header";
 import AppLayout from "@/components/layouts/app";
 import { NavMenu } from "@/components/navigation-menu";

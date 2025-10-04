@@ -1,12 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getTeamStorageConfigById } from "@/ee/features/storage/config";
 import { InvocationType, InvokeCommand } from "@aws-sdk/client-lambda";
 import { ItemType, ViewType } from "@prisma/client";
 import slugify from "@sindresorhus/slugify";
 
-import { getLambdaClientForTeam } from "@/lib/files/aws-client";
-import { notifyDocumentDownload } from "@/lib/integrations/slack/events";
+import { getLambdaClientForTeam, getStorageConfig } from "@/lib/files/aws-client";
 import prisma from "@/lib/prisma";
 import { getIpAddress } from "@/lib/utils/ip";
 
@@ -296,35 +294,17 @@ export default async function handler(
       };
     }
 
-    if (view.link.teamId) {
-      void notifyDocumentDownload({
-        teamId: view.link.teamId,
-        documentId: undefined,
-        dataroomId,
-        linkId,
-        viewerEmail: view.viewerEmail ?? undefined,
-        viewerId: undefined,
-        metadata: {
-          folderName: rootFolder.name,
-          documentCount: allDocuments.length,
-          isFolderDownload: true,
-        },
-      }).catch((error) => {
-        console.error("Error sending Slack notification:", error);
-      });
-    }
-
     // Get team-specific storage configuration
-    const [client, storageConfig] = await Promise.all([
+    const [client, bucket] = await Promise.all([
       getLambdaClientForTeam(view.link.teamId!),
-      getTeamStorageConfigById(view.link.teamId!),
+      getStorageConfig(),
     ]);
 
     const params = {
       FunctionName: `bulk-download-zip-creator-${process.env.NODE_ENV === "development" ? "dev" : "prod"}`,
       InvocationType: InvocationType.RequestResponse,
       Payload: JSON.stringify({
-        sourceBucket: storageConfig.bucket,
+        sourceBucket: bucket,
         fileKeys,
         folderStructure,
         watermarkConfig: view.link.enableWatermark

@@ -1,11 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getTeamStorageConfigById } from "@/ee/features/storage/config";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { InvocationType, InvokeCommand } from "@aws-sdk/client-lambda";
 import { getServerSession } from "next-auth";
 
-import { getLambdaClientForTeam } from "@/lib/files/aws-client";
+import { getLambdaClientForTeam, getTeamS3ClientAndConfig } from "@/lib/files/aws-client";
 import prisma from "@/lib/prisma";
 import { CustomUser } from "@/lib/types";
 
@@ -179,13 +178,13 @@ export default async function handler(
 
       // Get team-specific Lambda client and storage config
       const client = await getLambdaClientForTeam(teamId);
-      const storageConfig = await getTeamStorageConfigById(teamId);
+      const {config, bucket } = await getTeamS3ClientAndConfig(teamId);
 
       const params = {
-        FunctionName: storageConfig.lambdaFunctionName,
+        FunctionName: process.env.NEXT_PRIVATE_LAMBDA_FUNCTION_NAME, // This might break something IDK
         InvocationType: InvocationType.RequestResponse,
         Payload: JSON.stringify({
-          sourceBucket: storageConfig.bucket,
+          sourceBucket: bucket,
           fileKeys: fileKeys,
           folderStructure: folderStructure,
         }),

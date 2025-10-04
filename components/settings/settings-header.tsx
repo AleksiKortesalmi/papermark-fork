@@ -68,11 +68,6 @@ export function SettingsHeader() {
             segment: "webhooks",
           },
           {
-            label: "Slack",
-            href: `/settings/slack`,
-            segment: "slack",
-          },
-          {
             label: "Tokens",
             href: `/settings/tokens`,
             segment: "tokens",

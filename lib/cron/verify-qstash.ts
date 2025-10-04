@@ -1,4 +1,4 @@
-import { receiver } from ".";
+import { verifyPayload } from "./index";
 import { log } from "../utils";
 
 export const verifyQstashSignature = async ({
@@ -6,23 +6,20 @@ export const verifyQstashSignature = async ({
   rawBody,
 }: {
   req: Request;
-  rawBody: string; // Make sure to pass the raw body not the parsed JSON
+  rawBody: string; // Make sure to pass the raw body not parsed JSON
 }) => {
   // skip verification in local development
-  if (process.env.VERCEL !== "1") {
+  if (process.env.NODE_ENV !== "production") {
     return;
   }
 
   const signature = req.headers.get("Upstash-Signature");
 
   if (!signature) {
-    throw new Error("Upstash-Signature header not found.");
+    throw new Error("Signature header not found.");
   }
 
-  const isValid = await receiver.verify({
-    signature,
-    body: rawBody,
-  });
+  const isValid = verifyPayload(rawBody, signature);
 
   if (!isValid) {
     const url = req.url;

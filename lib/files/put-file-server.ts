@@ -88,7 +88,7 @@ const putFileInS3Server = async ({
     throw new Error("Unsupported file type");
   }
 
-  const { client, config } = await getTeamS3ClientAndConfig(teamId);
+  const { client, bucket } = await getTeamS3ClientAndConfig(teamId);
 
   // Get the basename and extension for the file
   const { name, ext } = path.parse(file.name);
@@ -96,7 +96,7 @@ const putFileInS3Server = async ({
   const key = `${teamId}/${docId}/${slugify(name)}${ext}`;
 
   const params = {
-    Bucket: config.bucket,
+    Bucket: bucket,
     Key: key,
     Body: file.buffer,
     ContentType: file.type,

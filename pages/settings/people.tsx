@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { mutate } from "swr";
@@ -31,7 +31,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UpgradeButton } from "@/components/ui/upgrade-button";
 
 export default function Billing() {
   const [isTeamMemberInviteModalOpen, setTeamMemberInviteModalOpen] =
@@ -43,7 +42,7 @@ export default function Billing() {
   const { team, loading } = useGetTeam()!;
   const teamInfo = useTeam();
   const { isTrial } = usePlan();
-  const { canAddUsers, showUpgradePlanModal } = useLimits();
+  const { canAddUsers, showUpgradePlanModal } = {canAddUsers: true, showUpgradePlanModal: false};
   const { teams } = useTeams();
   const analytics = useAnalytics();
 
@@ -244,13 +243,7 @@ export default function Billing() {
                   Teammates that have access to this project.
                 </p>
               </div>
-              {showUpgradePlanModal ? (
-                <UpgradeButton
-                  text="Invite Members"
-                  clickedPlan={isTrial ? PlanEnum.Business : PlanEnum.Pro}
-                  trigger="invite_team_members"
-                />
-              ) : showInvite ? (
+              {showInvite ? (
                 <AddTeamMembers
                   open={isTeamMemberInviteModalOpen}
                   setOpen={setTeamMemberInviteModalOpen}

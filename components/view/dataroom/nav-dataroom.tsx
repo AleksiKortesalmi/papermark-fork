@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import { Button } from "../../ui/button";
-import { ConversationSidebar } from "../conversations/sidebar";
+import { Button } from "../../ui/button"
 
 const DEFAULT_BANNER_IMAGE = "/_static/papermark-banner.png";
 
@@ -141,7 +140,7 @@ export default function DataroomNav({
                 />
               ) : (
                 <Link
-                  href={`https://www.papermark.com/home?utm_campaign=navbar&utm_medium=navbar&utm_source=papermark-${linkId}`}
+                  href={`/`}
                   target="_blank"
                   className="text-2xl font-bold tracking-tighter text-white"
                 >
@@ -213,18 +212,6 @@ export default function DataroomNav({
           </div>
         </div>
       </div>
-
-      {conversationsEnabled && showConversations ? (
-        <ConversationSidebar
-          dataroomId={dataroomId}
-          viewId={viewId || ""}
-          viewerId={viewerId}
-          linkId={linkId!}
-          isEnabled={true}
-          isOpen={showConversations}
-          onOpenChange={setShowConversations}
-        />
-      ) : null}
     </nav>
   );
 }

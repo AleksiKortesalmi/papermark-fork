@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { initialState } from "@/context/team-context";
 import { useTeam } from "@/context/team-context";
 import { TeamContextType } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { InfoIcon, ShieldAlertIcon } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 
@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-import { UpgradePlanModal } from "../billing/upgrade-plan-modal";
 import { AddTeamModal } from "../teams/add-team-modal";
 
 export const BlockingModal = () => {
@@ -114,35 +113,7 @@ export const BlockingModal = () => {
 
   return (
     <>
-      {/* <div className="flex w-full px-4">
-        {shouldShowBanner && (
-          <div className="flex w-full items-center gap-3 rounded-md border border-yellow-200 bg-yellow-50 p-4 text-sm dark:border-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-100">
-            <div className="flex-shrink-0">
-              <InfoIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium">
-                You&apos;re now on the free solo plan
-              </p>
-              <p className="mt-1 text-yellow-700 dark:text-yellow-200">
-                To continue collaborating with your team, please upgrade your
-                plan.
-              </p>
-            </div>
-            <UpgradePlanModal
-              clickedPlan={PlanEnum.Pro}
-              trigger="trial_end_blocking_modal"
-            >
-              <Button type="button" variant="orange">
-                Upgrade
-              </Button>
-            </UpgradePlanModal>
-            <Button type="button" variant="outline">
-              Dismiss
-            </Button>
-          </div>
-        )}
-      </div> */}
+      {}
       <AlertDialog open={!!shouldShowModal} onOpenChange={setShowModal}>
         <AlertDialogContent
           className="w-full max-w-lg"
@@ -181,14 +152,6 @@ export const BlockingModal = () => {
             >
               Log out
             </Button>
-            <UpgradePlanModal
-              clickedPlan={PlanEnum.Business}
-              trigger="trial_end_blocking_modal_for_team_member"
-            >
-              <Button className="w-full sm:w-auto" type="button">
-                Upgrade
-              </Button>
-            </UpgradePlanModal>
             {userTeam ? (
               <Button
                 variant="outline"

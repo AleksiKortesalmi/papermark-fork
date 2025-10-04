@@ -11,6 +11,7 @@ import PlanBadge from "@/components/billing/plan-badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { BadgeTooltip, ButtonTooltip } from "@/components/ui/tooltip";
+import { BasePlan } from "@/lib/swr/use-billing";
 
 export default function LinkItem({
   title,
@@ -27,7 +28,7 @@ export default function LinkItem({
   enabled: boolean;
   action: () => void;
   isAllowed?: boolean;
-  requiredPlan?: string;
+  requiredPlan?: BasePlan;
   upgradeAction?: () => void;
   link?: string;
   resetAction?: () => void;
@@ -35,7 +36,7 @@ export default function LinkItem({
 }) {
   const { isTrial } = usePlan();
   const showBadge =
-    isTrial && requiredPlan?.toLowerCase() === "data rooms plus";
+    isTrial && requiredPlan?.toLowerCase() === "datarooms-plus";
 
   return (
     <div className="flex items-center justify-between gap-x-2">

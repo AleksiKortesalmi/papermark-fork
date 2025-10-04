@@ -75,20 +75,6 @@ export default async function handler(
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Check if free plan user is trying to access data beyond 30 days
-    if (interval === "custom" && team.plan.includes("free")) {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      thirtyDaysAgo.setHours(0, 0, 0, 0);
-
-      // For custom range, check the provided start date
-      if (startStr && new Date(startStr) < thirtyDaysAgo) {
-        return res.status(401).json({
-          error: "Free plan users can only access data from the last 30 days",
-        });
-      }
-    }
-
     // get the start date for the interval
     const now = new Date();
     let startDate: Date;

@@ -92,7 +92,6 @@ export default function WatermarkSection({
         enabled={enabled}
         action={handleWatermarkToggle}
         isAllowed={isAllowed}
-        requiredPlan="datarooms"
         upgradeAction={() =>
           handleUpgradeStateChange({
             state: true,

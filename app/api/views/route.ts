@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { reportDeniedAccessAttempt } from "@/ee/features/access-notifications";
-import { getTeamStorageConfigById } from "@/ee/features/storage/config";
 // Import authOptions directly from the source
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { ipAddress, waitUntil } from "@vercel/functions";
@@ -14,7 +12,6 @@ import { sendOtpVerificationEmail } from "@/lib/emails/send-email-otp-verificati
 import { getFeatureFlags } from "@/lib/featureFlags";
 import { getFile } from "@/lib/files/get-file";
 import { newId } from "@/lib/id-helper";
-import { notifyDocumentView } from "@/lib/integrations/slack/events";
 import prisma from "@/lib/prisma";
 import { ratelimit } from "@/lib/redis";
 import { parseSheet } from "@/lib/sheet";
@@ -226,7 +223,6 @@ export async function POST(request: NextRequest) {
         );
       }
       if (globalBlockCheck.isBlocked) {
-        waitUntil(reportDeniedAccessAttempt(link, email, "global"));
 
         return NextResponse.json({ message: "Access denied" }, { status: 403 });
       }
@@ -240,8 +236,6 @@ export async function POST(request: NextRequest) {
 
         // Deny access if the email is not allowed
         if (!isAllowed) {
-          waitUntil(reportDeniedAccessAttempt(link, email, "allow"));
-
           return NextResponse.json(
             { message: "Unauthorized access" },
             { status: 403 },
@@ -258,8 +252,6 @@ export async function POST(request: NextRequest) {
 
         // Deny access if the email is denied
         if (isDenied) {
-          waitUntil(reportDeniedAccessAttempt(link, email, "deny"));
-
           return NextResponse.json(
             { message: "Unauthorized access" },
             { status: 403 },
@@ -543,7 +535,7 @@ export async function POST(request: NextRequest) {
           teamId: link.teamId!,
         });
         const inDocumentLinks =
-          !link.team?.plan.includes("free") || featureFlags.inDocumentLinks;
+          featureFlags.inDocumentLinks;
 
         // get pages from document version
         console.time("get-pages");
@@ -602,23 +594,13 @@ export async function POST(request: NextRequest) {
         }
 
         if (documentVersion.type === "sheet") {
-          if (useAdvancedExcelViewer) {
-            if (!documentVersion.file.includes("https://")) {
-              // Get team-specific storage config for advanced distribution host
-              const storageConfig = await getTeamStorageConfigById(
-                link.teamId!,
-              );
-              documentVersion.file = `https://${storageConfig.advancedDistributionHost}/${documentVersion.file}`;
-            }
-          } else {
-            const fileUrl = await getFile({
-              data: documentVersion.file,
-              type: documentVersion.storageType,
-            });
+          const fileUrl = await getFile({
+            data: documentVersion.file,
+            type: documentVersion.storageType,
+          });
 
-            const data = await parseSheet({ fileUrl });
-            sheetData = data;
-          }
+          const data = await parseSheet({ fileUrl });
+          sheetData = data;
         }
         console.timeEnd("get-file");
       }
@@ -637,19 +619,6 @@ export async function POST(request: NextRequest) {
             enableNotification: link.enableNotification,
           }),
         );
-        if (!isPreview) {
-          waitUntil(
-            notifyDocumentView({
-              teamId: link.teamId!,
-              documentId,
-              linkId,
-              viewerEmail: email ?? undefined,
-              viewerId: viewer?.id ?? undefined,
-            }).catch((error) => {
-              console.error("Error sending Slack notification:", error);
-            }),
-          );
-        }
       }
 
       const returnObject = {

@@ -1,10 +1,9 @@
 import { useTeam } from "@/context/team-context";
-import { PLAN_NAME_MAP } from "@/ee/stripe/constants";
-import { SubscriptionDiscount } from "@/ee/stripe/functions/get-subscription-item";
 import useSWR from "swr";
 import { useMemo } from "react";
 
 import { fetcher } from "@/lib/utils";
+import base from "base-x";
 
 interface BillingProps {
   id: string;
@@ -55,7 +54,7 @@ type PlanResponse = {
   cancelledAt: Date | null;
   isCustomer: boolean;
   subscriptionCycle: "monthly" | "yearly";
-  discount: SubscriptionDiscount | null;
+  discount: null;
 };
 
 interface PlanDetails {
@@ -89,39 +88,32 @@ export function usePlan({
   const teamInfo = useTeam();
   const teamId = teamInfo?.currentTeam?.id;
 
-  const {
-    data: plan,
-    error,
-    mutate,
-  } = useSWR<PlanResponse>(
-    teamId ? `/api/teams/${teamId}/billing/plan${withDiscount ? "?withDiscount=true" : ""}` : null,
-    fetcher,
-  );
-
+  const planDefault = "datarooms-plus" as BasePlan;
   // Parse the plan using the parsing function
-  const parsedPlan = useMemo(() => {
-    if (!plan || !plan.plan) {
-      return { plan: null, trial: null, old: false };
-    }
-    return parsePlan(plan.plan);
-  }, [plan]);
+  const parsedPlan = { plan: planDefault, trial: null, old: false };
+  // useMemo(() => {
+  //   if (!plan || !plan.plan) {
+  //     return { plan: null, trial: null, old: false };
+  //   }
+  //   return parsePlan(plan.plan);
+  // }, [plan]);
 
   return {
-    plan: parsedPlan.plan ?? "free",
-    planName: PLAN_NAME_MAP[parsedPlan.plan ?? "free"],
+    plan: parsedPlan.plan ?? "dataroom-plus",
+    planName: parsedPlan.plan ?? "dataroom-plus",
     originalPlan: parsedPlan.plan + (parsedPlan.old ? "+old" : ""),
     trial: parsedPlan.trial,
     isTrial: !!parsedPlan.trial,
     isOldAccount: parsedPlan.old,
-    isCustomer: plan?.isCustomer,
-    isAnnualPlan: plan?.subscriptionCycle === "yearly",
-    startsAt: plan?.startsAt,
-    endsAt: plan?.endsAt,
-    cancelledAt: plan?.cancelledAt,
-    isPaused: !!plan?.pauseStartsAt,
-    isCancelled: !!plan?.cancelledAt,
-    pauseStartsAt: plan?.pauseStartsAt,
-    discount: plan?.discount || null,
+    // isCustomer: plan?.isCustomer,
+    // isAnnualPlan: plan?.subscriptionCycle === "yearly",
+    // startsAt: plan?.startsAt,
+    // endsAt: plan?.endsAt,
+    // cancelledAt: plan?.cancelledAt,
+    // isPaused: !!plan?.pauseStartsAt,
+    // isCancelled: !!plan?.cancelledAt,
+    // pauseStartsAt: plan?.pauseStartsAt,
+    // discount: plan?.discount || null,
     isFree: parsedPlan.plan === "free",
     isStarter: parsedPlan.plan === "starter",
     isPro: parsedPlan.plan === "pro",
@@ -129,8 +121,8 @@ export function usePlan({
     isDatarooms:
       parsedPlan.plan === "datarooms" || parsedPlan.plan === "datarooms-plus",
     isDataroomsPlus: parsedPlan.plan === "datarooms-plus",
-    loading: !plan && !error && !!teamId, // Only show loading if we have a teamId but no data
-    error,
-    mutate,
+    // loading: !plan && !error && !!teamId, // Only show loading if we have a teamId but no data
+    // error,
+    // mutate,
   };
 }

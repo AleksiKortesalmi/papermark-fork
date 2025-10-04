@@ -1,10 +1,26 @@
-import {
-  type StorageConfig,
-  getStorageConfig,
-  getTeamStorageConfigById,
-} from "@/ee/features/storage/config";
-import { LambdaClient } from "@aws-sdk/client-lambda";
-import { S3Client } from "@aws-sdk/client-s3";
+import { LambdaClient, LambdaClientConfig } from "@aws-sdk/client-lambda";
+import { S3Client, S3ClientConfig } from "@aws-sdk/client-s3";
+
+export const getStorageConfig = (): S3ClientConfig => {
+  return {
+    endpoint: process.env.S3_ENDPOINT!,
+    region: process.env.S3_REGION!,
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+    },
+  };
+};
+
+export const getLambdaConfig = (): LambdaClientConfig => {
+  return {
+    endpoint: process.env.S3_ENDPOINT!,
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+    },
+  };
+};
 
 export const getS3Client = (storageRegion?: string) => {
   const NEXT_PUBLIC_UPLOAD_TRANSPORT = process.env.NEXT_PUBLIC_UPLOAD_TRANSPORT;
@@ -13,16 +29,7 @@ export const getS3Client = (storageRegion?: string) => {
     throw new Error("Invalid upload transport");
   }
 
-  const config = getStorageConfig(storageRegion);
-
-  return new S3Client({
-    endpoint: config.endpoint || undefined,
-    region: config.region,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
-    },
-  });
+  return new S3Client(getStorageConfig());
 };
 
 export const getS3ClientForTeam = async (teamId: string) => {
@@ -32,16 +39,7 @@ export const getS3ClientForTeam = async (teamId: string) => {
     throw new Error("Invalid upload transport");
   }
 
-  const config = await getTeamStorageConfigById(teamId);
-
-  return new S3Client({
-    endpoint: config.endpoint || undefined,
-    region: config.region,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
-    },
-  });
+  return new S3Client(getStorageConfig());
 };
 
 export const getLambdaClient = (storageRegion?: string) => {
@@ -51,15 +49,7 @@ export const getLambdaClient = (storageRegion?: string) => {
     throw new Error("Invalid upload transport");
   }
 
-  const config = getStorageConfig(storageRegion);
-
-  return new LambdaClient({
-    region: config.region,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
-    },
-  });
+  return new LambdaClient(getLambdaConfig());
 };
 
 export const getLambdaClientForTeam = async (teamId: string) => {
@@ -69,15 +59,7 @@ export const getLambdaClientForTeam = async (teamId: string) => {
     throw new Error("Invalid upload transport");
   }
 
-  const config = await getTeamStorageConfigById(teamId);
-
-  return new LambdaClient({
-    region: config.region,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
-    },
-  });
+  return new LambdaClient(getLambdaConfig());
 };
 
 /**
@@ -94,16 +76,11 @@ export const getTeamS3ClientAndConfig = async (teamId: string) => {
     throw new Error("Invalid upload transport");
   }
 
-  const config = await getTeamStorageConfigById(teamId);
+  const config = getStorageConfig();
 
-  const client = new S3Client({
-    endpoint: config.endpoint || undefined,
-    region: config.region,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
-    },
-  });
+  const client = new S3Client(config);
+  
+  const bucket = process.env.S3_BUCKET_NAME!;
 
-  return { client, config };
+  return { client, config, bucket };
 };

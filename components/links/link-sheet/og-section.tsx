@@ -143,7 +143,7 @@ export default function OGSection({
         enabled={enableCustomMetatag}
         action={handleCustomMetatag}
         isAllowed={isAllowed}
-        requiredPlan="Business"
+        requiredPlan="business"
         upgradeAction={() =>
           handleUpgradeStateChange({
             state: true,

@@ -52,26 +52,10 @@ export default async function handler(
       return res.status(400).json({ error: "Invalid key format" });
     }
 
-    const { client, config } = await getTeamS3ClientAndConfig(teamId);
-
-    if (config.distributionHost) {
-      const distributionUrl = new URL(
-        key,
-        `https://${config.distributionHost}`,
-      );
-
-      const url = getCloudfrontSignedUrl({
-        url: distributionUrl.toString(),
-        keyPairId: `${config.distributionKeyId}`,
-        privateKey: `${config.distributionKeyContents}`,
-        dateLessThan: new Date(Date.now() + ONE_HOUR).toISOString(),
-      });
-
-      return res.status(200).json({ url });
-    }
+    const { client, config, bucket } = await getTeamS3ClientAndConfig(teamId);
 
     const getObjectCommand = new GetObjectCommand({
-      Bucket: config.bucket,
+      Bucket: bucket,
       Key: key,
     });
 

@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
 import {
   ColumnDef,
   SortingState,
@@ -42,8 +41,6 @@ import { usePlan } from "@/lib/swr/use-billing";
 import { cn, timeAgo } from "@/lib/utils";
 import { fetcher } from "@/lib/utils";
 import { downloadCSV } from "@/lib/utils/csv";
-
-import { UpgradeButton } from "../ui/upgrade-button";
 
 interface Link {
   id: string;
@@ -284,31 +281,17 @@ export default function LinksTable({
     downloadCSV(exportData, "links");
   };
 
-  const UpgradeOrExportButton = () => {
-    if (isFree && !isTrial) {
-      return (
-        <UpgradeButton
-          text="Export"
-          clickedPlan={PlanEnum.Pro}
-          trigger="dashboard_links_export"
-          variant="outline"
-          size="sm"
-        />
-      );
-    } else {
-      return (
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="!size-4" />
-          Export
-        </Button>
-      );
-    }
+  const ExportButton = () => {
+    return <Button variant="outline" size="sm" onClick={handleExport}>
+      <Download className="!size-4" />
+      Export
+    </Button>
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <UpgradeOrExportButton />
+        <ExportButton />
       </div>
       <div className="overflow-x-auto rounded-xl border">
         <Table>

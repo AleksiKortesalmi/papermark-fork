@@ -1,19 +1,73 @@
-import { Receiver } from "@upstash/qstash";
-import { Client } from "@upstash/qstash";
+import { Queue, Worker } from "bullmq";
+import { redis } from "../redis"
 import Bottleneck from "bottleneck";
+import crypto from "crypto";
 
-// we're using Bottleneck to avoid running into Resend's rate limit of 10 req/s
+// -----------------------------
+// Bottleneck rate limiter (same behavior)
+// -----------------------------
 export const limiter = new Bottleneck({
   maxConcurrent: 1, // maximum concurrent requests
   minTime: 100, // minimum time between requests in ms
 });
 
-// we're using Upstash's Receiver to verify the request signature
-export const receiver = new Receiver({
-  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY || "",
-  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || "",
+// -----------------------------
+// Self-hosted signing
+// -----------------------------
+const SIGNING_KEY = process.env.QSTASH_SIGNING_KEY || "supersecret";
+
+// sign payload
+export function signPayload(payload: string) {
+  return crypto.createHmac("sha256", SIGNING_KEY).update(payload).digest("hex");
+}
+
+// verify payload
+export function verifyPayload(payload: string, signature: string) {
+  const expected = signPayload(payload);
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
+
+// -----------------------------
+// BullMQ Queue for jobs
+// -----------------------------
+export const qstashQueue = new Queue("jobs", {
+  connection: redis as any,
 });
 
-export const qstash = new Client({
-  token: process.env.QSTASH_TOKEN || "",
-});
+// Worker to process jobs
+export const worker = new Worker(
+  "jobs",
+  async (job) => {
+    await limiter.schedule(async () => {
+      console.log("[LocalQStash] Processing job:", job.data);
+      // Replace with actual job logic (HTTP requests, emails, etc.)
+    });
+  },
+  {
+    connection: redis as any,
+  }
+);
+
+// -----------------------------
+// Replacement for qstash.send()
+// -----------------------------
+export const qstash = {
+  send: async ({
+    url,
+    body,
+    headers = {},
+    method = "POST",
+  }: {
+    url: string;
+    body: any;
+    headers?: Record<string, string>;
+    method?: string;
+  }) => {
+    const payload = { url, body, headers, method, createdAt: Date.now() };
+    const signature = signPayload(JSON.stringify(payload));
+
+    // Add signature and message ID to the payload
+    await qstashQueue.add("job", { ...payload, signature, messageId: crypto.randomUUID() });
+    console.log("[LocalQStash] Job queued:", payload);
+  },
+};

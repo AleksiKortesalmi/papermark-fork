@@ -1,3 +1,3 @@
-import { useLimits } from "@/ee/limits/swr-handler";
+function useLimits() { return { limits: null } };
 
 export default useLimits;

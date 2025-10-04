@@ -69,15 +69,16 @@ export default async function handler(
     // Get the basename and extension for the file
     const { name, ext } = path.parse(fileName);
     const slugifiedName = slugify(name) + ext;
-    const key = `${team.id}/${docId}/${slugifiedName}`;
 
-    const { client, config } = await getTeamS3ClientAndConfig(team.id);
+    const { client, config, bucket } = await getTeamS3ClientAndConfig(team.id);
+
+    const key = `${bucket}/${docId}/${slugifiedName}`;
 
     switch (action) {
       case "initiate": {
         // Step 1: Start multipart upload
         const createCommand = new CreateMultipartUploadCommand({
-          Bucket: config.bucket,
+          Bucket: bucket,
           Key: key,
           ContentType: contentType,
           ContentDisposition: `attachment; filename="${slugifiedName}"`,
@@ -105,7 +106,7 @@ export default async function handler(
           Array.from({ length: numParts }, async (_, index) => {
             const partNumber = index + 1;
             const command = new UploadPartCommand({
-              Bucket: config.bucket,
+              Bucket: bucket,
               Key: key,
               PartNumber: partNumber,
               UploadId: uploadId,
@@ -131,7 +132,7 @@ export default async function handler(
         const { uploadId, parts } = data;
 
         const completeCommand = new CompleteMultipartUploadCommand({
-          Bucket: config.bucket,
+          Bucket: bucket,
           Key: key,
           UploadId: uploadId,
           MultipartUpload: {
@@ -153,7 +154,7 @@ export default async function handler(
           // Cleanup: Abort the multipart upload to prevent storage costs
           try {
             const abortCommand = new AbortMultipartUploadCommand({
-              Bucket: config.bucket,
+              Bucket: bucket,
               Key: key,
               UploadId: uploadId,
             });

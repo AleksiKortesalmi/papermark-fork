@@ -3,10 +3,9 @@ import { useRouter } from "next/router";
 
 import { useEffect } from "react";
 
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { PlusIcon } from "lucide-react";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { AddDataroomModal } from "@/components/datarooms/add-dataroom-modal";
 import { DataroomTrialModal } from "@/components/datarooms/dataroom-trial-modal";
 import { EmptyDataroom } from "@/components/datarooms/empty-dataroom";
@@ -34,12 +33,8 @@ export default function DataroomsPage() {
   const router = useRouter();
 
   const numDatarooms = datarooms?.length ?? 0;
-  const limitDatarooms = limits?.datarooms ?? 1;
 
-  const canCreateUnlimitedDatarooms =
-    isDatarooms ||
-    isDataroomsPlus ||
-    (isBusiness && numDatarooms < limitDatarooms);
+  const canCreateUnlimitedDatarooms = true;
 
   useEffect(() => {
     if (!isTrial && (isFree || isPro)) router.push("/documents");
@@ -58,62 +53,15 @@ export default function DataroomsPage() {
             </p>
           </div>
           <div className="flex items-center gap-x-1">
-            {isBusiness && !canCreateUnlimitedDatarooms ? (
-              <UpgradePlanModal
-                clickedPlan={PlanEnum.DataRooms}
-                trigger="datarooms"
+            <AddDataroomModal>
+              <Button
+                className="group flex flex-1 items-center justify-start gap-x-3 px-3 text-left"
+                title="Create New Document"
               >
-                <Button
-                  className="group flex flex-1 items-center justify-start gap-x-3 px-3 text-left"
-                  title="Upgrade to Add Data Room"
-                >
-                  <span>Upgrade to Add Data Room</span>
-                </Button>
-              </UpgradePlanModal>
-            ) : isTrial &&
-              datarooms &&
-              !isBusiness &&
-              !isDatarooms &&
-              !isDataroomsPlus ? (
-              <div className="flex items-center gap-x-4">
-                <div className="text-sm text-destructive">
-                  <span>Dataroom Trial: </span>
-                  <span className="font-medium">
-                    {daysLeft(new Date(datarooms[0].createdAt), 7)} days left
-                  </span>
-                </div>
-                <UpgradePlanModal
-                  clickedPlan={PlanEnum.DataRooms}
-                  trigger="datarooms"
-                >
-                  <Button
-                    className="group flex flex-1 items-center justify-start gap-x-3 px-3 text-left"
-                    title="Upgrade to Add Data Room"
-                  >
-                    <span>Upgrade to Add Data Room</span>
-                  </Button>
-                </UpgradePlanModal>
-              </div>
-            ) : isBusiness || isDatarooms || isDataroomsPlus ? (
-              <AddDataroomModal>
-                <Button
-                  className="group flex flex-1 items-center justify-start gap-x-3 px-3 text-left"
-                  title="Create New Document"
-                >
-                  <PlusIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                  <span>Create New Dataroom</span>
-                </Button>
-              </AddDataroomModal>
-            ) : (
-              <DataroomTrialModal>
-                <Button
-                  className="group flex flex-1 items-center justify-start gap-x-3 px-3 text-left"
-                  title="Start Data Room Trial"
-                >
-                  <span>Start Data Room Trial</span>
-                </Button>
-              </DataroomTrialModal>
-            )}
+                <PlusIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span>Create New Dataroom</span>
+              </Button>
+            </AddDataroomModal>
           </div>
         </section>
 

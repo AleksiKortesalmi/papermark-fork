@@ -6,9 +6,9 @@ type TQueueConfig = {
 };
 
 const concurrencyConfig: Record<string, number> = {
-  free: 1,
-  starter: 1,
-  pro: 2,
+  free: 10,
+  starter: 10,
+  pro: 10,
   business: 10,
   datarooms: 10,
   "datarooms-plus": 10,

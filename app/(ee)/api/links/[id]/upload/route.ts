@@ -101,7 +101,7 @@ export async function POST(
     const document = await processDocument({
       documentData: updatedDocumentData,
       teamId: link.teamId,
-      teamPlan: link.team?.plan ?? "free",
+      teamPlan: "dataroom-plus", //link.team?.plan ?? "free",
       isExternalUpload: true,
     });
 

@@ -44,7 +44,6 @@ import {
 } from "../ui/breadcrumb";
 import { Button } from "../ui/button";
 import { AnnotationToggle } from "./annotations/annotation-toggle";
-import { ConversationSidebar } from "./conversations/sidebar";
 import ReportForm from "./report-form";
 
 export type TNavData = {
@@ -439,19 +438,6 @@ export default function Nav({
           </div>
         </div>
       </div>
-      {isDataroom && conversationsEnabled && showConversations ? (
-        <ConversationSidebar
-          dataroomId={dataroomId}
-          documentId={documentId}
-          pageNumber={pageNumber}
-          viewId={viewId || ""}
-          viewerId={viewerId}
-          linkId={linkId!}
-          isEnabled={true}
-          isOpen={showConversations}
-          onOpenChange={setShowConversations}
-        />
-      ) : null}
     </nav>
   );
 }

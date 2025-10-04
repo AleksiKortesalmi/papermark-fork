@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { DefaultPermissionStrategy } from "@prisma/client";
 import { parsePageId } from "notion-utils";
 import { toast } from "sonner";
@@ -45,8 +45,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { UpgradePlanModal } from "../billing/upgrade-plan-modal";
-
 interface DataroomDocument {
   id: string;
   documentId: string;
@@ -83,7 +81,7 @@ export function AddDocumentModal({
     }[]
   >([]);
   const teamInfo = useTeam();
-  const { canAddDocuments } = useLimits();
+  const { canAddDocuments } = { canAddDocuments: true };
   const { plan, isFree, isTrial } = usePlan();
   const { dataroom } = useDataroom();
   const teamId = teamInfo?.currentTeam?.id as string;
@@ -530,27 +528,6 @@ export function AddDocumentModal({
     setIsOpen(!isOpen);
     setAddDocumentModalOpen && setAddDocumentModalOpen(!isOpen);
   };
-
-  if (!canAddDocuments && children) {
-    if (newVersion) {
-      return (
-        <UpgradePlanModal
-          clickedPlan={PlanEnum.Pro}
-          trigger={"limit_upload_document_version"}
-        >
-          {children}
-        </UpgradePlanModal>
-      );
-    }
-    return (
-      <UpgradePlanModal
-        clickedPlan={PlanEnum.Pro}
-        trigger={"limit_upload_documents"}
-      >
-        <Button>Upgrade to Add Documents</Button>
-      </UpgradePlanModal>
-    );
-  }
 
   return (
     <>

@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 
 import { TeamContextType } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import {
   BetweenHorizontalStartIcon,
   ChevronRight,
@@ -27,7 +27,6 @@ import { cn, getBreadcrumbPath, nFormatter, timeAgo } from "@/lib/utils";
 import { fileIcon } from "@/lib/utils/get-file-icon";
 import { useCopyToClipboard } from "@/lib/utils/use-copy-to-clipboard";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { DataroomTrialModal } from "@/components/datarooms/dataroom-trial-modal";
 import { AddToDataroomModal } from "@/components/documents/add-document-to-dataroom-modal";
 import { DocumentPreviewModal } from "@/components/documents/document-preview-modal";
@@ -78,7 +77,6 @@ export default function DocumentsCard({
   const { datarooms } = useDatarooms();
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const { canAddDocuments } = useLimits();
 
   /** current folder name */
   const currentFolderPath = router.query.name as string[] | undefined;
@@ -414,14 +412,6 @@ export default function DocumentsCard({
         <DataroomTrialModal
           openModal={trialModalOpen}
           setOpenModal={setTrialModalOpen}
-        />
-      ) : null}
-      {planModalOpen ? (
-        <UpgradePlanModal
-          clickedPlan={PlanEnum.DataRooms}
-          trigger="datarooms"
-          open={planModalOpen}
-          setOpen={setPlanModalOpen}
         />
       ) : null}
 

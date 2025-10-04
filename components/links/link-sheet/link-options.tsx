@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { LinkAudienceType, LinkType } from "@prisma/client";
 import { LinkPreset } from "@prisma/client";
 import { ChevronDown } from "lucide-react";
@@ -9,7 +9,6 @@ import { usePlan } from "@/lib/swr/use-billing";
 import useLimits from "@/lib/swr/use-limits";
 import { cn } from "@/lib/utils";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { DEFAULT_LINK_TYPE } from "@/components/links/link-sheet";
 import AllowDownloadSection from "@/components/links/link-sheet/allow-download-section";
 import AllowListSection from "@/components/links/link-sheet/allow-list-section";
@@ -29,7 +28,6 @@ import {
 } from "@/components/ui/collapsible";
 
 import AgreementSection from "./agreement-section";
-import ConversationSection from "./conversation-section";
 import CustomFieldsSection from "./custom-fields-section";
 import IndexFileSection from "./index-file-section";
 import QuestionSection from "./question-section";
@@ -98,14 +96,11 @@ export const LinkOptions = ({
     isTrial,
   } = usePlan();
   const { limits } = useLimits();
-  const allowAdvancedLinkControls = limits
-    ? limits?.advancedLinkControlsOnPro
-    : false;
-  const allowWatermarkOnBusiness = limits?.watermarkOnBusiness ?? false;
+  const allowAdvancedLinkControls = true;
+  const allowWatermarkOnBusiness = true;
 
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
   const [trigger, setTrigger] = useState<string>("");
-  const [upgradePlan, setUpgradePlan] = useState<PlanEnum>(PlanEnum.Business);
   const [highlightItem, setHighlightItem] = useState<string[]>([]);
 
   const handleUpgradeStateChange = ({
@@ -116,9 +111,6 @@ export const LinkOptions = ({
   }: LinkUpgradeOptions) => {
     setOpenUpgradeModal(state);
     setTrigger(trigger);
-    if (plan) {
-      setUpgradePlan(plan as PlanEnum);
-    }
     setHighlightItem(highlightItem || []);
   };
 
@@ -231,9 +223,7 @@ export const LinkOptions = ({
             <UploadSection
               {...{ data, setData }}
               isAllowed={
-                isTrial ||
-                isDataroomsPlus ||
-                (isDatarooms && limits?.dataroomUpload === true)
+                true
               }
               handleUpgradeStateChange={handleUpgradeStateChange}
               targetId={targetId}
@@ -244,18 +234,6 @@ export const LinkOptions = ({
             <IndexFileSection
               {...{ data, setData }}
               isAllowed={isTrial || isDataroomsPlus}
-              handleUpgradeStateChange={handleUpgradeStateChange}
-            />
-          ) : null}
-
-          {linkType === LinkType.DATAROOM_LINK &&
-          limits?.conversationsInDataroom ? (
-            <ConversationSection
-              {...{ data, setData }}
-              isAllowed={
-                isDataroomsPlus ||
-                ((isBusiness || isDatarooms) && limits?.conversationsInDataroom)
-              }
               handleUpgradeStateChange={handleUpgradeStateChange}
             />
           ) : null}
@@ -301,14 +279,6 @@ export const LinkOptions = ({
           handleUpgradeStateChange={handleUpgradeStateChange}
         />
       ) : null}
-
-      <UpgradePlanModal
-        clickedPlan={upgradePlan}
-        open={openUpgradeModal}
-        setOpen={setOpenUpgradeModal}
-        trigger={trigger}
-        highlightItem={highlightItem}
-      />
     </div>
   );
 };

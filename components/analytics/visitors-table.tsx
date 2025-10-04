@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import {
   ColumnDef,
   SortingState,
@@ -41,7 +41,6 @@ import { VisitorAvatar } from "@/components/visitors/visitor-avatar";
 import { usePlan } from "@/lib/swr/use-billing";
 import { durationFormat, fetcher, timeAgo } from "@/lib/utils";
 import { downloadCSV } from "@/lib/utils/csv";
-import { UpgradeButton } from "../ui/upgrade-button";
 
 interface Visitor {
   email: string;
@@ -266,31 +265,19 @@ export default function VisitorsTable({
     downloadCSV(exportData, "visitors");
   };
 
-  const UpgradeOrExportButton = () => {
-    if (isFree && !isTrial) {
-      return (
-        <UpgradeButton
-          text="Export"
-          clickedPlan={PlanEnum.Pro}
-          trigger="dashboard_visitors_export"
-          variant="outline"
-          size="sm"
-        />
-      );
-    } else {
-      return (
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="!size-4" />
-          Export
-        </Button>
-      );
-    }
+  const ExportButton = () => {
+    return (
+      <Button variant="outline" size="sm" onClick={handleExport}>
+        <Download className="!size-4" />
+        Export
+      </Button>
+    );
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <UpgradeOrExportButton />
+        <ExportButton />
       </div>
       <div className="overflow-x-auto rounded-xl border">
         <Table>

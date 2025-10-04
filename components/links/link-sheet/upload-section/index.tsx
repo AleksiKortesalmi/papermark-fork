@@ -197,7 +197,6 @@ export default function UploadSection({
         enabled={enabled}
         action={handleUpload}
         isAllowed={isAllowed}
-        requiredPlan="data rooms plus"
         upgradeAction={() =>
           handleUpgradeStateChange({
             state: true,

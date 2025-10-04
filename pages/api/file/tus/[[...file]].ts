@@ -1,13 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { MultiRegionS3Store } from "@/ee/features/storage/s3-store";
 import { CopyObjectCommand } from "@aws-sdk/client-s3";
 import slugify from "@sindresorhus/slugify";
+import { S3Store } from "@tus/s3-store";
 import { Server } from "@tus/server";
 import { getServerSession } from "next-auth/next";
 import path from "node:path";
 
-import { getTeamS3ClientAndConfig } from "@/lib/files/aws-client";
+import { getStorageConfig, getTeamS3ClientAndConfig } from "@/lib/files/aws-client";
 import { RedisLocker } from "@/lib/files/tus-redis-locker";
 import { newId } from "@/lib/id-helper";
 import { lockerRedisClient } from "@/lib/redis";
@@ -26,13 +26,15 @@ const locker = new RedisLocker({
   redisClient: lockerRedisClient,
 });
 
+const storageConfig = getStorageConfig();
+
 const tusServer = new Server({
   // `path` needs to match the route declared by the next file router
   path: "/api/file/tus",
   maxSize: 1024 * 1024 * 1024 * 2, // 2 GiB
   respectForwardedHeaders: true,
   locker,
-  datastore: new MultiRegionS3Store(),
+  datastore: new S3Store({ s3ClientConfig: { ...storageConfig, bucket: process.env.S3_BUCKET! } }),
   namingFunction(req, metadata) {
     const { teamId, fileName } = metadata as {
       teamId: string;
@@ -79,10 +81,12 @@ const tusServer = new Server({
       // Get team-specific S3 client and config
       const { client, config } = await getTeamS3ClientAndConfig(teamId);
 
+      const bucket = process.env.S3_BUCKET!;
+
       // Copy the object onto itself, replacing the metadata
       const params = {
-        Bucket: config.bucket,
-        CopySource: `${config.bucket}/${objectKey}`,
+        Bucket: bucket,
+        CopySource: `${bucket}/${objectKey}`,
         Key: objectKey,
         ContentType: contentType,
         ContentDisposition: contentDisposition,

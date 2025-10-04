@@ -214,24 +214,24 @@ function prepareRemotePatterns() {
     });
   }
 
-  if (process.env.VERCEL_ENV === "production") {
-    patterns.push({
-      // production vercel blob
-      protocol: "https",
-      hostname: "yoywvlh29jppecbh.public.blob.vercel-storage.com",
-    });
-  }
+  // if (process.env.VERCEL_ENV === "production") {
+  //   patterns.push({
+  //     // production vercel blob
+  //     protocol: "https",
+  //     hostname: "yoywvlh29jppecbh.public.blob.vercel-storage.com",
+  //   });
+  // }
 
-  if (
-    process.env.VERCEL_ENV === "preview" ||
-    process.env.NODE_ENV === "development"
-  ) {
-    patterns.push({
-      // staging vercel blob
-      protocol: "https",
-      hostname: "36so9a8uzykxknsu.public.blob.vercel-storage.com",
-    });
-  }
+  // if (
+  //   process.env.VERCEL_ENV === "preview" ||
+  //   process.env.NODE_ENV === "development"
+  // ) {
+  //   patterns.push({
+  //     // staging vercel blob
+  //     protocol: "https",
+  //     hostname: "36so9a8uzykxknsu.public.blob.vercel-storage.com",
+  //   });
+  // }
 
   return patterns;
 }

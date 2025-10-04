@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { reportDeniedAccessAttempt } from "@/ee/features/access-notifications";
-import { getTeamStorageConfigById } from "@/ee/features/storage/config";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { ItemType, LinkAudienceType } from "@prisma/client";
 import { ipAddress, waitUntil } from "@vercel/functions";
@@ -17,10 +15,6 @@ import { PreviewSession, verifyPreviewSession } from "@/lib/auth/preview-auth";
 import { sendOtpVerificationEmail } from "@/lib/emails/send-email-otp-verification";
 import { getFile } from "@/lib/files/get-file";
 import { newId } from "@/lib/id-helper";
-import {
-  notifyDataroomAccess,
-  notifyDocumentView,
-} from "@/lib/integrations/slack/events";
 import prisma from "@/lib/prisma";
 import { ratelimit } from "@/lib/redis";
 import { parseSheet } from "@/lib/sheet";
@@ -293,8 +287,6 @@ export async function POST(request: NextRequest) {
         );
       }
       if (globalBlockCheck.isBlocked) {
-        waitUntil(reportDeniedAccessAttempt(link, email, "global"));
-
         return NextResponse.json({ message: "Access denied" }, { status: 403 });
       }
 
@@ -307,8 +299,6 @@ export async function POST(request: NextRequest) {
 
         // Deny access if the email is not allowed
         if (!isAllowed) {
-          waitUntil(reportDeniedAccessAttempt(link, email, "allow"));
-
           return NextResponse.json(
             { message: "Unauthorized access" },
             { status: 403 },
@@ -325,8 +315,6 @@ export async function POST(request: NextRequest) {
 
         // Deny access if the email is denied
         if (isDenied) {
-          waitUntil(reportDeniedAccessAttempt(link, email, "deny"));
-
           return NextResponse.json(
             { message: "Unauthorized access" },
             { status: 403 },
@@ -369,7 +357,6 @@ export async function POST(request: NextRequest) {
             : false;
 
           if (!isMember && !hasDomainAccess) {
-            waitUntil(reportDeniedAccessAttempt(link, email, "allow"));
             return NextResponse.json(
               { message: "Unauthorized access" },
               { status: 403 },
@@ -661,24 +648,6 @@ export async function POST(request: NextRequest) {
               enableNotification: link.enableNotification,
             }),
           );
-
-          if (link.teamId && !isPreview) {
-            waitUntil(
-              (async () => {
-                try {
-                  await notifyDataroomAccess({
-                    teamId: link.teamId!,
-                    dataroomId,
-                    linkId,
-                    viewerEmail: verifiedEmail ?? email,
-                    viewerId: viewer?.id,
-                  });
-                } catch (error) {
-                  console.error("Error sending Slack notification:", error);
-                }
-              })(),
-            );
-          }
         }
 
         const dataroomViewId =
@@ -790,25 +759,6 @@ export async function POST(request: NextRequest) {
           select: { id: true },
         });
         console.timeEnd("create-view");
-        // Only send Slack notifications for non-preview views
-        if (link.teamId && !isPreview) {
-          waitUntil(
-            (async () => {
-              try {
-                await notifyDocumentView({
-                  teamId: link.teamId!,
-                  documentId,
-                  dataroomId,
-                  linkId,
-                  viewerEmail: verifiedEmail ?? email,
-                  viewerId: viewer?.id,
-                });
-              } catch (error) {
-                console.error("Error sending Slack notification:", error);
-              }
-            })(),
-          );
-        }
       }
 
       // if document version has pages, then return pages
@@ -826,8 +776,8 @@ export async function POST(request: NextRequest) {
             file: true,
             storageType: true,
             pageNumber: true,
-            embeddedLinks: !link.team?.plan.includes("free"),
-            pageLinks: !link.team?.plan.includes("free"),
+            embeddedLinks: true,
+            pageLinks: true,
             metadata: true,
           },
         });
@@ -879,25 +829,13 @@ export async function POST(request: NextRequest) {
           });
           useAdvancedExcelViewer = document?.advancedExcelEnabled ?? false;
 
-          if (useAdvancedExcelViewer) {
-            if (documentVersion.file.includes("https://")) {
-              documentVersion.file = documentVersion.file;
-            } else {
-              // Get team-specific storage config for advanced distribution host
-              const storageConfig = await getTeamStorageConfigById(
-                link.teamId!,
-              );
-              documentVersion.file = `https://${storageConfig.advancedDistributionHost}/${documentVersion.file}`;
-            }
-          } else {
-            const fileUrl = await getFile({
-              data: documentVersion.file,
-              type: documentVersion.storageType,
-            });
+          const fileUrl = await getFile({
+            data: documentVersion.file,
+            type: documentVersion.storageType,
+          });
 
-            const data = await parseSheet({ fileUrl });
-            sheetData = data;
-          }
+          const data = await parseSheet({ fileUrl });
+          sheetData = data;
         }
         console.timeEnd("get-file");
       }

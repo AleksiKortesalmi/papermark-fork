@@ -82,10 +82,6 @@ export const exportVisitsTask = task({
         throw new Error("Team not found or access denied");
       }
 
-      if (team.plan === "free") {
-        throw new Error("This feature is not available for your plan");
-      }
-
       let csvData: string;
       let resourceName: string;
 

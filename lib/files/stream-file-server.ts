@@ -21,7 +21,7 @@ export const streamFileServer = async ({
   teamId: string;
   docId: string;
 }) => {
-  const { client, config } = await getTeamS3ClientAndConfig(teamId);
+  const { client, bucket } = await getTeamS3ClientAndConfig(teamId);
 
   // Get the basename and extension for the file
   const { name, ext } = path.parse(file.name);
@@ -31,7 +31,7 @@ export const streamFileServer = async ({
   const params = {
     client,
     params: {
-      Bucket: config.bucket,
+      Bucket: bucket,
       Key: key,
       Body: file.stream,
       ContentType: file.type,

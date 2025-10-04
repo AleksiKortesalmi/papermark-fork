@@ -72,13 +72,13 @@ const copyFileInS3Server = async ({
   const fromLocation = `${teamId}/${fromDocId}/`;
   const toLocation = `${teamId}/${toDocId}/`;
 
-  const { config } = await getTeamS3ClientAndConfig(teamId);
+  const { bucket } = await getTeamS3ClientAndConfig(teamId);
 
   const response = await copyFolder(
     {
-      fromBucket: config.bucket,
+      fromBucket: bucket,
       fromLocation: fromLocation,
-      toBucket: config.bucket,
+      toBucket: bucket,
       toLocation: toLocation,
     },
     teamId,

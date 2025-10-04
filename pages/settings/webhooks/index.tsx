@@ -40,7 +40,7 @@ export default function WebhookSettings() {
               <h3 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground">
                 Webhooks{" "}
                 {(isFree || isPro) && !isTrial ? (
-                  <PlanBadge plan="Business" />
+                  <PlanBadge plan="business" />
                 ) : null}
               </h3>
               <p className="flex flex-row items-center gap-2 text-sm text-muted-foreground">

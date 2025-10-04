@@ -33,12 +33,12 @@ const deleteAllFilesFromS3Server = async (data: string, teamId: string) => {
   const dataMatch = data.match(/^(.*doc_[^\/]+)\//);
   const folderPath = dataMatch ? dataMatch[1] : data;
 
-  const { client, config } = await getTeamS3ClientAndConfig(teamId);
+  const { client, config, bucket } = await getTeamS3ClientAndConfig(teamId);
 
   try {
     // List all objects in the folder
     const listParams = {
-      Bucket: config.bucket,
+      Bucket: bucket,
       Prefix: `${folderPath}/`, // Ensure this ends with a slash if it's a folder
     };
     const listedObjects = await client.send(
@@ -50,7 +50,7 @@ const deleteAllFilesFromS3Server = async (data: string, teamId: string) => {
 
     // Prepare delete parameters
     const deleteParams = {
-      Bucket: config.bucket,
+      Bucket: bucket,
       Delete: {
         Objects: listedObjects.Contents.map((file) => ({ Key: file.Key })),
       },

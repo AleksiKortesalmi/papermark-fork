@@ -56,7 +56,7 @@ async function createDataroomSession(
   await redis.set(
     `dataroom_session:${sessionToken}`,
     JSON.stringify(sessionData),
-    { pxat: expiresAt },
+    "PXAT", expiresAt,
   );
 
   return {

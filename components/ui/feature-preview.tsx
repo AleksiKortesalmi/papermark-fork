@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { LockIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UpgradeButton } from "@/components/ui/upgrade-button";
 
 interface FeaturePreviewProps {
   /**
@@ -26,7 +25,7 @@ interface FeaturePreviewProps {
   /**
    * The plan required to access this feature
    */
-  requiredPlan: PlanEnum;
+  requiredPlan: string;
   /**
    * Analytics trigger identifier for tracking upgrade clicks
    */
@@ -53,7 +52,7 @@ interface FeaturePreviewProps {
  * <FeaturePreview
  *   title="Advanced Analytics"
  *   description="Get detailed insights into document engagement and user behavior"
- *   requiredPlan={PlanEnum.DataRooms}
+ *   requiredPlan="datarooms"
  *   trigger="analytics_preview"
  * >
  *   <YourMockAnalyticsComponent />
@@ -89,15 +88,6 @@ export function FeaturePreview({
               {description}
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center">
-            <UpgradeButton
-              text={upgradeButtonText}
-              clickedPlan={requiredPlan}
-              trigger={trigger}
-              size="lg"
-              className="w-full"
-            />
-          </CardContent>
         </Card>
       </div>
     </div>

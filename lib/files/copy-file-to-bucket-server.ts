@@ -34,12 +34,12 @@ const copyFileToBucketInS3Server = async ({
   filePath: string;
   teamId: string;
 }) => {
-  const { client, config } = await getTeamS3ClientAndConfig(teamId);
+  const { client, bucket } = await getTeamS3ClientAndConfig(teamId);
 
   try {
     const copyCommand = new CopyObjectCommand({
-      CopySource: `${config.bucket}/${filePath}`,
-      Bucket: config.advancedBucket,
+      CopySource: `${bucket}/${filePath}`,
+      Bucket: bucket,
       Key: filePath,
     });
 

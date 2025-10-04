@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useMemo, useRef, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { DocumentVersion, LinkAudienceType } from "@prisma/client";
 import { isWithinInterval, subMinutes } from "date-fns";
 import {
@@ -26,7 +26,6 @@ import { LinkWithViews, WatermarkConfig } from "@/lib/types";
 import { cn, copyToClipboard, fetcher, nFormatter, timeAgo } from "@/lib/utils";
 import { useMediaQuery } from "@/lib/utils/use-media-query";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -71,8 +70,6 @@ import LinkSheet, {
   DEFAULT_LINK_PROPS,
   type DEFAULT_LINK_TYPE,
 } from "./link-sheet";
-import { DataroomLinkSheet } from "./link-sheet/dataroom-link-sheet";
-import { PermissionsSheet } from "./link-sheet/permissions-sheet";
 import { TagColumn } from "./link-sheet/tags/tag-details";
 import LinksVisitors from "./links-visitors";
 import { PreviewButton } from "./preview-button";
@@ -149,8 +146,6 @@ export default function LinksTable({
       return link.tags.some((tag) => selectedTagNames.includes(tag.name));
     });
   }, [links, processedLinks, selectedTagNames]);
-
-  const { canAddLinks } = useLimits();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingLinks, setLoadingLinks] = useState<Set<string>>(new Set());
@@ -474,22 +469,9 @@ export default function LinksTable({
   };
 
   const AddLinkButton = () => {
-    if (!canAddLinks) {
-      return (
-        <UpgradePlanModal
-          clickedPlan={isTrial ? PlanEnum.Business : PlanEnum.Pro}
-          trigger={"limit_add_link"}
-        >
-          <Button>Upgrade to Create Link</Button>
-        </UpgradePlanModal>
-      );
-    } else {
-      return (
-        <Button onClick={() => setIsLinkSheetVisible(true)}>
-          Create link to share
-        </Button>
-      );
-    }
+    return <Button onClick={() => setIsLinkSheetVisible(true)}>
+        Create link to share
+      </Button>
   };
 
   const handleArchiveLink = async (
@@ -886,7 +868,7 @@ export default function LinksTable({
                                 Preview Link
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                disabled={!canAddLinks}
+                                disabled={false}
                                 onClick={() => handleDuplicateLink(link)}
                               >
                                 <CopyPlusIcon className="mr-2 h-4 w-4" />
@@ -941,39 +923,13 @@ export default function LinksTable({
           </Table>
         </div>
 
-        {targetType === "DATAROOM" ? (
-          <>
-            <DataroomLinkSheet
-              isOpen={isLinkSheetVisible}
-              setIsOpen={setIsLinkSheetVisible}
-              linkType={`${targetType}_LINK`}
-              currentLink={selectedLink.id ? selectedLink : undefined}
-              existingLinks={links}
-            />
-
-            <PermissionsSheet
-              isOpen={showPermissionsSheet}
-              setIsOpen={(open: boolean) => {
-                setShowPermissionsSheet(open);
-                if (!open) {
-                  setEditPermissionLink(null);
-                }
-              }}
-              dataroomId={targetId}
-              linkId={editPermissionLink?.id}
-              permissionGroupId={editPermissionLink?.permissionGroupId}
-              onSave={handlePermissionsSave}
-            />
-          </>
-        ) : (
-          <LinkSheet
-            isOpen={isLinkSheetVisible}
-            setIsOpen={setIsLinkSheetVisible}
-            linkType={`${targetType}_LINK`}
-            currentLink={selectedLink.id ? selectedLink : undefined}
-            existingLinks={links}
-          />
-        )}
+        <LinkSheet
+          isOpen={isLinkSheetVisible}
+          setIsOpen={setIsLinkSheetVisible}
+          linkType={`${targetType}_LINK`}
+          currentLink={selectedLink.id ? selectedLink : undefined}
+          existingLinks={links}
+        />
 
         {selectedEmbedLink && (
           <EmbedCodeModal

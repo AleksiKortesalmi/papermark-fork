@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { Domain } from "@prisma/client";
 import { mutate } from "swr";
 
@@ -12,7 +12,6 @@ import { BasePlan, usePlan } from "@/lib/swr/use-billing";
 import useLimits from "@/lib/swr/use-limits";
 import { cn } from "@/lib/utils";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { AddDomainModal } from "@/components/domains/add-domain-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,10 +47,8 @@ export default function DomainSection({
   const { isBusiness, isDatarooms, isDataroomsPlus } = usePlan();
 
   // Check plan eligibility for custom domains
-  const canUseCustomDomainForDocument =
-    isBusiness || isDatarooms || isDataroomsPlus || limits?.customDomainOnPro;
-  const canUseCustomDomainForDataroom =
-    isDatarooms || isDataroomsPlus || limits?.customDomainInDataroom;
+  const canUseCustomDomainForDocument = true;
+  const canUseCustomDomainForDataroom = true;
 
   // Check if we're editing a link with a custom domain
   const isEditingCustomDomain =
@@ -310,21 +307,6 @@ export default function DomainSection({
         open={isModalOpen}
         setOpen={setModalOpen}
         linkType={linkType}
-      />
-
-      {/* Upgrade plan modal when trying to use custom domains without the right plan */}
-      <UpgradePlanModal
-        clickedPlan={
-          linkType === "DATAROOM_LINK" ? PlanEnum.DataRooms : PlanEnum.Business
-        }
-        open={isUpgradeModalOpen}
-        setOpen={setUpgradeModalOpen}
-        trigger={
-          linkType === "DATAROOM_LINK"
-            ? "select_custom_domain_dataroom"
-            : "select_custom_domain_document"
-        }
-        highlightItem={["custom-domain"]}
       />
     </>
   );

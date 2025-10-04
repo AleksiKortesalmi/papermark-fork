@@ -33,7 +33,7 @@ async function createPreviewSession(
   await redis.set(
     `preview_session:${sessionToken}`,
     JSON.stringify(sessionData),
-    { pxat: expiresAt },
+    "PXAT", expiresAt,
   );
 
   return {

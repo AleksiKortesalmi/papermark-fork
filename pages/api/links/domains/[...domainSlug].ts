@@ -132,7 +132,7 @@ export default async function handle(
         return res.status(403).json({ message: "Access denied" });
       }
 
-      const teamPlan = link.team?.plan || "free";
+      const teamPlan = "dataroom-plus";
       const teamId = link.teamId;
       // if owner of document is on free plan, return 404
       if (teamPlan.includes("free")) {

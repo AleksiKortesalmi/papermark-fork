@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { DocumentVersion } from "@prisma/client";
 import {
   AlertTriangleIcon,
@@ -42,7 +42,6 @@ import {
 } from "@/components/ui/table";
 import { BadgeTooltip } from "@/components/ui/tooltip";
 
-import { UpgradePlanModal } from "../billing/upgrade-plan-modal";
 import { Pagination } from "../documents/pagination";
 import { Button } from "../ui/button";
 import {
@@ -479,14 +478,6 @@ export default function VisitorsTable({
                         Some older visits may not be shown because your document
                         has more than 20 views.{" "}
                       </span>
-                      <UpgradePlanModal
-                        clickedPlan={isTrial ? PlanEnum.Business : PlanEnum.Pro}
-                        trigger=""
-                      >
-                        <button className="underline hover:text-gray-800">
-                          Upgrade to see full history
-                        </button>
-                      </UpgradePlanModal>
                     </div>
                   </TableCell>
                 </TableRow>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { ChartNoAxesColumnIcon, LogsIcon } from "lucide-react";
 
 import { usePlan } from "@/lib/swr/use-billing";
@@ -98,7 +98,7 @@ export default function DataroomAnalyticsPage() {
                 <FeaturePreview
                   title="Advanced Dataroom Analytics"
                   description="Get detailed insights into document engagement, completion rates, and visitor behavior patterns across your dataroom."
-                  requiredPlan={PlanEnum.DataRooms}
+                  requiredPlan="free"
                   trigger="dataroom_analytics_tab"
                   upgradeButtonText="Data Rooms"
                 >

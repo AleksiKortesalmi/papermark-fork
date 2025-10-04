@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import {
   FileJson,
   FileSlidersIcon,
@@ -14,7 +14,6 @@ import { usePlan } from "@/lib/swr/use-billing";
 import { useDataroomLinks } from "@/lib/swr/use-dataroom";
 import { IndexFileFormat } from "@/lib/types/index-file";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -216,21 +215,12 @@ export default function GenerateIndexDialog({
           </div>
         </div>
         <DialogFooter>
-          {hasDataroomsPlan ? (
-            <Button
-              onClick={handleGenerateIndex}
-              disabled={!selectedLinkId || isLoading}
-            >
-              {isLoading ? "Generating..." : "Generate"}
-            </Button>
-          ) : (
-            <UpgradePlanModal
-              clickedPlan={PlanEnum.DataRooms}
-              trigger="datarooms_generate_index_button"
-            >
-              <Button>Upgrade to generate</Button>
-            </UpgradePlanModal>
-          )}
+          <Button
+            onClick={handleGenerateIndex}
+            disabled={!selectedLinkId || isLoading}
+          >
+            {isLoading ? "Generating..." : "Generate"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { z } from "zod";
@@ -23,8 +23,6 @@ import { Label } from "@/components/ui/label";
 
 import { useAnalytics } from "@/lib/analytics";
 import { usePlan } from "@/lib/swr/use-billing";
-
-import { UpgradePlanModal } from "../billing/upgrade-plan-modal";
 
 export function AddDataroomModal({
   children,
@@ -98,20 +96,6 @@ export function AddDataroomModal({
       if (openModal && setOpenModal) setOpenModal(false);
     }
   };
-
-  // If the team is on a free plan, show the upgrade modal
-  if (isFree || isPro) {
-    if (children) {
-      return (
-        <UpgradePlanModal
-          clickedPlan={PlanEnum.DataRooms}
-          trigger={"add_dataroom_overview"}
-        >
-          {children}
-        </UpgradePlanModal>
-      );
-    }
-  }
 
   const onOpenChange = (open: boolean) => {
     if (!open) {

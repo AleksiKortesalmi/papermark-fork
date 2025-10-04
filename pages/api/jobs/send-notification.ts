@@ -177,10 +177,7 @@ export default async function handle(
     ownerEmail = ownerUser?.user.email || null;
   }
 
-  const includeLocation =
-    !view.team?.plan?.includes("free") &&
-    !view.team?.plan?.includes("starter") &&
-    !view.team?.plan?.includes("pro");
+  const includeLocation = true;
 
   const locationString =
     locationData.country === "US"

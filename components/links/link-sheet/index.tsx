@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { useTeam } from "@/context/team-context";
-import { PlanEnum } from "@/ee/stripe/constants";
+
 import { LinkAudienceType, LinkPreset, LinkType } from "@prisma/client";
 import { RefreshCwIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -19,7 +19,6 @@ import useLimits from "@/lib/swr/use-limits";
 import { LinkWithViews, WatermarkConfig } from "@/lib/types";
 import { convertDataUrlToFile, fetcher, uploadImage } from "@/lib/utils";
 
-import { UpgradePlanModal } from "@/components/billing/upgrade-plan-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +42,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ButtonTooltip } from "@/components/ui/tooltip";
 
 import { CustomFieldData } from "./custom-fields-panel";
-import { type ItemPermission } from "./dataroom-link-sheet";
 import DomainSection from "./domain-section";
 import { LinkOptions } from "./link-options";
 import TagSection from "./tags/tag-section";
@@ -94,6 +92,10 @@ export const DEFAULT_LINK_PROPS = (
   permissionGroupId: null,
 });
 
+export type PermissionObject = {
+  placeholderforsomethinguseful?: string | null;
+}
+
 export type DEFAULT_LINK_TYPE = {
   id: string | null;
   name: string | null;
@@ -132,7 +134,7 @@ export type DEFAULT_LINK_TYPE = {
   uploadFolderId: string | null;
   uploadFolderName: string;
   enableIndexFile: boolean;
-  permissions?: ItemPermission | null; // For dataroom links file permissions
+  permissions?: PermissionObject | null; // For dataroom links file permissions
   permissionGroupId?: string | null;
 };
 
@@ -174,12 +176,7 @@ export default function LinkSheet({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [currentPreset, setCurrentPreset] = useState<LinkPreset | null>(null);
 
-  const isPresetsAllowed =
-    isTrial ||
-    (isPro && limits?.advancedLinkControlsOnPro) ||
-    isBusiness ||
-    isDatarooms ||
-    isDataroomsPlus;
+  const isPresetsAllowed = true;
 
   // Presets
   const { data: presets } = useSWR<LinkPreset[]>(
@@ -485,20 +482,9 @@ export default function LinkSheet({
                         <TabsTrigger value={LinkAudienceType.GENERAL}>
                           General
                         </TabsTrigger>
-                        {isDatarooms || isDataroomsPlus || isTrial ? (
-                          <TabsTrigger value={LinkAudienceType.GROUP}>
-                            Group
-                          </TabsTrigger>
-                        ) : (
-                          <UpgradePlanModal
-                            clickedPlan={PlanEnum.DataRooms}
-                            trigger="add_group_link"
-                          >
-                            <div className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all">
-                              Group
-                            </div>
-                          </UpgradePlanModal>
-                        )}
+                        <TabsTrigger value={LinkAudienceType.GROUP}>
+                          Group
+                        </TabsTrigger>
                       </TabsList>
                     ) : null}
 

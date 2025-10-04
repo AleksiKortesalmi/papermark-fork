@@ -64,12 +64,7 @@ export const sendDataroomTrialExpiredEmailTask = task({
         data: { plan: team.plan.replace("+drtrial", "") },
       });
 
-      const isPaid = [
-        "pro",
-        "business",
-        "datarooms",
-        "datarooms-plus",
-      ].includes(updatedTeam.plan);
+      const isPaid = true;
 
       if (!isPaid) {
         // remove branding
@@ -125,16 +120,6 @@ export const sendUpgradeOneMonthCheckinEmailTask = task({
 
       if (!team) {
         logger.error("Team not found", { teamId: payload.teamId });
-        return;
-      }
-
-      if (
-        !["pro", "business", "datarooms", "datarooms-plus"].includes(team.plan)
-      ) {
-        logger.info("Team not on paid plan - no further action", {
-          teamId: payload.teamId,
-          plan: team.plan,
-        });
         return;
       }
 
