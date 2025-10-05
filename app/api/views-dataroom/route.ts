@@ -371,7 +371,7 @@ export async function POST(request: NextRequest) {
       if (link.emailAuthenticated && !code && !token && !dataroomVerified) {
         const ipAddressValue = ipAddress(request);
 
-        const { success } = await ratelimit(10, "1 m").limit(
+        const { success } = await ratelimit(10, 60).limit(
           `send-otp:${ipAddressValue}`,
         );
         if (!success) {
@@ -411,7 +411,7 @@ export async function POST(request: NextRequest) {
 
       if (link.emailAuthenticated && code && !dataroomVerified) {
         const ipAddressValue = ipAddress(request);
-        const { success } = await ratelimit(10, "1 m").limit(
+        const { success } = await ratelimit(10, 60).limit(
           `verify-otp:${ipAddressValue}`,
         );
         if (!success) {
@@ -480,7 +480,7 @@ export async function POST(request: NextRequest) {
 
       if (link.emailAuthenticated && token && !dataroomVerified) {
         const ipAddressValue = ipAddress(request);
-        const { success } = await ratelimit(10, "1 m").limit(
+        const { success } = await ratelimit(10, 60).limit(
           `verify-email:${ipAddressValue}`,
         );
         if (!success) {

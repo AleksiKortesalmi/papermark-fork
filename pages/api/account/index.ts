@@ -15,6 +15,8 @@ import { CustomUser } from "@/lib/types";
 import { trim } from "@/lib/utils";
 
 import { authOptions } from "../auth/[...nextauth]";
+import { json } from "stream/consumers";
+import { stringify } from "querystring";
 
 const updateUserSchema = z.object({
   name: z.preprocess(trim, z.string().min(1).max(64)).optional(),
@@ -48,7 +50,7 @@ export default async function handle(
         if (userWithEmail) {
           throw new Error("Email is already in use.");
         }
-        const { success } = await ratelimit(6, "6 h").limit(
+        const { success } = await ratelimit(6, 60 * 60 * 6).limit(
           `email-change-request:${sessionUser.id}`,
         );
         if (!success) {
@@ -69,10 +71,10 @@ export default async function handle(
 
         await redis.set(
           `email-change-request:user:${sessionUser.id}`,
-          {
+          JSON.stringify({
             email: sessionUser.email,
             newEmail: email,
-          },
+          }),
           "PX", expiresIn,
         );
 

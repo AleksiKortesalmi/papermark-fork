@@ -49,7 +49,7 @@ export const worker = new Worker(
 );
 
 // -----------------------------
-// Replacement for qstash.send()
+// Replacement for qstash
 // -----------------------------
 export const qstash = {
   send: async ({
@@ -69,5 +69,59 @@ export const qstash = {
     // Add signature and message ID to the payload
     await qstashQueue.add("job", { ...payload, signature, messageId: crypto.randomUUID() });
     console.log("[LocalQStash] Job queued:", payload);
+  },
+  /**
+   * Local replacement for QStash.publishJSON
+   * Usage:
+   *   await qstash.publishJSON({ url: "/api/send-email", body: { to: "test@example.com" } })
+   */
+  publishJSON: async ({
+    url,
+    body,
+    headers = {},
+    method = "POST",
+    callback,
+    failureCallback,
+  }: {
+    url: string;
+    body: Record<string, any>;
+    headers?: Record<string, string>;
+    method?: string;
+    callback?: string;          // success callback
+    failureCallback?: string;   // failure callback
+  }) => {
+    const fullHeaders = {
+      "Content-Type": "application/json",
+      ...headers,
+    };
+
+    const payload = {
+      url,
+      body,
+      headers: fullHeaders,
+      method,
+      callback,
+      failureCallback,
+      createdAt: Date.now(),
+    };
+
+    const signature = signPayload(JSON.stringify(payload));
+    const messageId = crypto.randomUUID();
+
+    await qstashQueue.add("job", {
+      ...payload,
+      signature,
+      messageId,
+    });
+
+    console.log("[LocalQStash] JSON job queued:", payload);
+
+    return {
+      messageId,
+      url,
+      callback,
+      failureCallback,
+      queuedAt: new Date().toISOString(),
+    };
   },
 };

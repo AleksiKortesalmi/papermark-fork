@@ -201,7 +201,7 @@ export default async function handle(
         team: undefined,
         document: undefined,
         dataroom: undefined,
-        ...(teamPlan === "free" && {
+        ...({
           customFields: [], // reset custom fields for free plan
           enableAgreement: false,
           enableWatermark: false,

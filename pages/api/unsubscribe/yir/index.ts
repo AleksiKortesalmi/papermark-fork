@@ -32,7 +32,7 @@ export default async function handle(
       req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
     const { success, limit, reset, remaining } = await ratelimit(
       5,
-      "1 m",
+      60,
     ).limit(`unsubscribe_${ipAddress}`);
 
     // Set rate limit headers

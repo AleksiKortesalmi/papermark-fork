@@ -32,7 +32,7 @@ export default async function handle(
       // Default: 120 requests per minute per user per document
       const { success, limit, remaining, reset } = await ratelimit(
         120,
-        "1 m",
+        60,
       ).limit(`doc:${docId}:team:${teamId}:user:${userId}`);
 
       res.setHeader("X-RateLimit-Limit", limit.toString());

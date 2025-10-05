@@ -82,9 +82,12 @@ const VerifyEmailChange = async ({ params: { token } }: PageProps) => {
 
   const currentUserId = (session.user as CustomUser).id;
 
-  const data = await redis.get<{ email: string; newEmail: string }>(
-    `email-change-request:user:${currentUserId}`,
-  );
+  const raw = await redis.get(`email-change-request:user:${currentUserId}`);
+
+  if (!raw) return <NotFound />;
+
+  // Parse JSON safely
+  const data = JSON.parse(raw) as { email: string; newEmail: string };
 
   if (!data) return <NotFound />;
 

@@ -130,7 +130,7 @@ export default async function incomingWebhookHandler(
 
   const { success, limit, reset, remaining } = await ratelimit(
     rateLimit,
-    "1 m",
+    60,
   ).limit(hashedToken);
 
   // Set rate limit headers

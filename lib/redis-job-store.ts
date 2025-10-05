@@ -73,11 +73,11 @@ export class RedisJobStore {
     await redis.setex(jobKey, JOB_TTL, JSON.stringify(job));
 
     // Add to user's job list (sorted by creation time)
-    await redis.zadd(userJobsKey, { score: Date.now(), member: jobId });
+    await redis.zadd(userJobsKey, Date.now(), jobId );
     await redis.expire(userJobsKey, JOB_TTL);
 
     // Add to team's job list (sorted by creation time)
-    await redis.zadd(teamJobsKey, { score: Date.now(), member: jobId });
+    await redis.zadd(teamJobsKey, Date.now(), jobId );
     await redis.expire(teamJobsKey, JOB_TTL);
 
     return job;
@@ -135,14 +135,14 @@ export class RedisJobStore {
     const cleanupQueueKey = this.getCleanupQueueKey();
 
     // Store blob URL with cleanup timestamp
-    await redis.zadd(cleanupQueueKey, {
-      score: cleanupTime,
-      member: JSON.stringify({
+    await redis.zadd(cleanupQueueKey,
+      cleanupTime,
+      JSON.stringify({
         blobUrl,
         jobId,
         scheduledAt: new Date().toISOString(),
       }),
-    });
+    );
   }
 
   async getBlobsForCleanup(
@@ -152,9 +152,7 @@ export class RedisJobStore {
     const maxScore = beforeTimestamp || Date.now();
 
     // Get all items scheduled for cleanup before the specified timestamp
-    const items = await redis.zrange(cleanupQueueKey, 0, maxScore, {
-      byScore: true,
-    });
+    const items = await redis.zrange(cleanupQueueKey, 0, maxScore );
 
     const blobs: Array<ExportJobCleanupItem> = [];
 
@@ -216,7 +214,7 @@ export class RedisJobStore {
     const userJobsKey = this.getUserJobsKey(userId);
 
     // Get job IDs sorted by creation time (newest first)
-    const jobIds = await redis.zrange(userJobsKey, 0, limit - 1, { rev: true });
+    const jobIds = await redis.zrange(userJobsKey, 0, limit - 1);
 
     if (!jobIds.length) {
       return [];
@@ -237,7 +235,7 @@ export class RedisJobStore {
     const teamJobsKey = this.getTeamJobsKey(teamId);
 
     // Get job IDs sorted by creation time (newest first)
-    const jobIds = await redis.zrange(teamJobsKey, 0, limit - 1, { rev: true });
+    const jobIds = await redis.zrange(teamJobsKey, 0, limit - 1);
 
     if (!jobIds.length) {
       return [];

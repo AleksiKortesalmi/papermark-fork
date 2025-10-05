@@ -52,7 +52,7 @@ async function fetchAndCacheDurations(
       });
     }
 
-    await redis.set(cacheKey, JSON.stringify(durationsMap), { EX: 600 });
+    await redis.set(cacheKey, JSON.stringify(durationsMap), "EX", 600);
   }
 
   return durationsMap;
@@ -292,7 +292,7 @@ export default async function handle(
       };
 
       if (withDuration !== "true") {
-        await redis.set(cacheKey, JSON.stringify(formattedViews), { EX: 600 }); // 10 min cache
+        await redis.set(cacheKey, JSON.stringify(formattedViews), "EX",  600); // 10 min cache
       }
       res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=300');
 

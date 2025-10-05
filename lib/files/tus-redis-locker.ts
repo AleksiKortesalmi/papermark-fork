@@ -76,7 +76,6 @@ class RedisLock implements Lock {
 
     const lockKey = `tus-lock-${id}`;
     const lock = await this.locker.redisClient.set(lockKey, "locked",
-      "NX", true,
       "PX", this.timeout
     );
 
