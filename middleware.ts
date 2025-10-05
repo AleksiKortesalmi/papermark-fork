@@ -20,6 +20,8 @@ function isAnalyticsPath(path: string) {
 }
 
 function isCustomDomain(host: string) {
+  return false; // Disable custom domains
+
   return (
     (process.env.NODE_ENV === "development" &&
       (host?.includes(".local") || host?.includes("papermark.dev"))) ||
