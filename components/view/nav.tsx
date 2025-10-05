@@ -429,12 +429,12 @@ export default function Nav({
               </div>
             ) : null}
             {/* add a separator that doesn't use radix or shadcn  */}
-            <div className="h-6 w-px bg-gray-800" />
+            {/* <div className="h-6 w-px bg-gray-800" />
             <ReportForm
               linkId={linkId}
               documentId={documentId}
               viewId={viewId}
-            />
+            /> */}
           </div>
         </div>
       </div>
