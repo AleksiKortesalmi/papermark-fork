@@ -1,13 +1,29 @@
 import { JSXElementConstructor, ReactElement } from "react";
-
 import { render, toPlainText } from "@react-email/render";
-import { Resend } from "resend";
-
+import nodemailer from "nodemailer";
 import { log, nanoid } from "@/lib/utils";
 
-export const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+/**
+ * SMTP configuration for Docker Mailserver.
+ * Set environment variables in your container or `.env`:
+ *
+ * MAIL_HOST=smtp.mail.local
+ * MAIL_PORT=587
+ * MAIL_USER=system@papermark.io
+ * MAIL_PASS=yourpassword
+ */
+const transporter = nodemailer.createTransport({
+  host: process.env.MAIL_HOST || "mail",
+  port: Number(process.env.MAIL_PORT) || 465,
+  secure: false, // use STARTTLS
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false, // allow self-signed certs in Docker
+  },
+});
 
 export const sendEmail = async ({
   to,
@@ -36,61 +52,65 @@ export const sendEmail = async ({
   scheduledAt?: string;
   unsubscribeUrl?: string;
 }) => {
-  if (!resend) {
-    // Throw an error if resend is not initialized
-    throw new Error("Resend not initialized");
-  }
-
   const html = await render(react);
   const plainText = toPlainText(html);
 
-  const fromAddress =
-    from ??
-    (marketing
-      ? "Marc from Papermark <marc@ship.papermark.io>"
-      : system
-        ? "Papermark <system@papermark.io>"
-        : verify
-          ? "Papermark <system@verify.papermark.io>"
-          : !!scheduledAt
-            ? "Marc Seitz <marc@papermark.io>"
-            : "Marc from Papermark <marc@papermark.io>");
+  const fromAddress = process.env.FROM_SYSTEM_EMAIL
+    // from ??
+    // (marketing
+    //   ? "Marc from Papermark <marc@ship.papermark.io>"
+    //   : system
+    //     ? "Papermark <system@papermark.io>"
+    //     : verify
+    //       ? "Papermark <system@verify.papermark.io>"
+    //       : !!scheduledAt
+    //         ? "Marc Seitz <marc@papermark.io>"
+    //         : "Marc from Papermark <marc@papermark.io>");
 
   try {
-    const { data, error } = await resend.emails.send({
+    // Test emails go to a dummy address
+    const recipient = test ? "test@papermark.io" : to;
+
+    const message = {
       from: fromAddress,
-      to: test ? "delivered@resend.dev" : to,
-      cc: cc,
+      to: recipient,
+      cc,
       replyTo: marketing ? "marc@papermark.io" : replyTo,
       subject,
-      react,
-      scheduledAt,
+      html,
       text: plainText,
       headers: {
         "X-Entity-Ref-ID": nanoid(),
         ...(unsubscribeUrl ? { "List-Unsubscribe": unsubscribeUrl } : {}),
       },
-    });
+    };
 
-    // Check if the email sending operation returned an error and throw it
-    if (error) {
-      log({
-        message: `Resend returned error when sending email: ${error.name} \n\n ${error.message}`,
-        type: "error",
-        mention: true,
-      });
-      throw error;
+    // Handle scheduled sending (queue or delay)
+    if (scheduledAt) {
+      const delay = new Date(scheduledAt).getTime() - Date.now();
+      if (delay > 0) {
+        log({
+          message: `Delaying email for ${delay / 1000}s (scheduled for ${scheduledAt})`,
+          type: "info",
+        });
+        await new Promise((r) => setTimeout(r, delay));
+      }
     }
 
-    // If there's no error, return the data
-    return data;
-  } catch (exception) {
-    // Log and rethrow any caught exceptions for upstream handling
+    const info = await transporter.sendMail(message);
+
     log({
-      message: `Unexpected error when sending email: ${exception}`,
+      message: `Email sent successfully: ${info.messageId}`,
+      type: "info",
+    });
+
+    return info;
+  } catch (error) {
+    log({
+      message: `Error sending email via Mailserver: ${error}`,
       type: "error",
       mention: true,
     });
-    throw exception; // Rethrow the caught exception
+    throw error;
   }
 };
