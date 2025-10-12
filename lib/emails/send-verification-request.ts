@@ -9,6 +9,13 @@ export const sendVerificationRequestEmail = async (params: {
   url: string;
 }) => {
   const { url, email } = params;
+
+  // Prevent non wanted sign ins
+  if(!process.env.EMAIL_WHITELIST || !process.env.EMAIL_WHITELIST.includes(email)) {
+    console.error("Email not in whitelist!")
+    return;
+  }
+
   const checksum = generateChecksum(url);
   const verificationUrlParams = new URLSearchParams({
     verification_url: url,

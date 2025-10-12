@@ -55,19 +55,6 @@ export default function ViewedDataroom({
               ) : null}{" "}
               from the link <span className="font-semibold">{linkName}</span>.
             </Text>
-            <Text className="text-sm leading-6 text-black">
-              You can get the detailed engagement analytics like time-spent per
-              document page and total duration for this dataroom on Papermark.
-            </Text>
-            <Section className="my-8 text-center">
-              <Button
-                className="rounded bg-black text-center text-xs font-semibold text-white no-underline"
-                href={`https://app.papermark.com/datarooms/${dataroomId}`}
-                style={{ padding: "12px 20px" }}
-              >
-                See my dataroom insights
-              </Button>
-            </Section>
 
             <Footer
               footerText={

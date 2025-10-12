@@ -163,15 +163,6 @@ export function NavUser() {
                   <LifeBuoyIcon />
                   Help Center
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    navigator.clipboard.writeText("support@papermark.io");
-                    toast.success("support@papermark.io copied to clipboard");
-                  }}
-                >
-                  <MailIcon />
-                  Contact Support
-                </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem

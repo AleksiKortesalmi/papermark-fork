@@ -11,7 +11,6 @@ const data = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.papermark.com"),
   title: data.title,
   description: data.description,
   openGraph: {
@@ -28,13 +27,6 @@ export const metadata: Metadata = {
     ],
     locale: "en_US",
     type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: data.title,
-    description: data.description,
-    creator: "@papermarkio",
-    images: ["/_static/meta-image.png"],
   },
 };
 

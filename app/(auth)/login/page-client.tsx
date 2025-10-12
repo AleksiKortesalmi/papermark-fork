@@ -25,7 +25,7 @@ export default function Login() {
   const { next } = useParams as { next?: string };
 
   const [lastUsed, setLastUsed] = useLastUsed();
-  const authMethods = ["google", "email", "linkedin", "passkey"] as const;
+  const authMethods = ["email"] as const;
   type AuthMethod = (typeof authMethods)[number];
   const [clickedMethod, setClickedMethod] = useState<AuthMethod | undefined>(
     undefined,
@@ -47,7 +47,7 @@ export default function Login() {
   return (
     <div className="flex h-screen w-full flex-wrap">
       {/* Left part */}
-      <div className="flex w-full justify-center bg-gray-50 md:w-1/2 lg:w-1/2">
+      <div className="flex w-full justify-center bg-gray-50">
         <div
           className="absolute inset-x-0 top-10 -z-10 flex transform-gpu justify-center overflow-hidden blur-3xl"
           aria-hidden="true"

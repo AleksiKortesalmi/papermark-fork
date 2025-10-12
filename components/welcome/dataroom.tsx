@@ -41,22 +41,6 @@ export default function Dataroom() {
         variants={STAGGER_CHILD_VARIANTS}
         className="mx-auto mt-24 w-full"
       >
-        <video
-          width="100%"
-          id="video1"
-          style={{ borderRadius: "6px" }}
-          aria-hidden="true"
-          playsInline
-          autoPlay
-          muted
-          loop
-          controls
-        >
-          <source
-            src="https://assets.papermark.io/upload/file_A4qNV68jr3MAUayMNi3WmY-Data-Room-demo-2.mp4"
-            type="video/mp4"
-          />
-        </video>
       </motion.div>
       <motion.div
         variants={STAGGER_CHILD_VARIANTS}

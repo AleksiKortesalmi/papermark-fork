@@ -44,16 +44,6 @@ export default function App({
           content="Papermark is an open-source document sharing alternative to DocSend with built-in analytics."
           key="og-description"
         />
-        <meta
-          property="og:image"
-          content="https://www.papermark.com/_static/meta-image.png"
-          key="og-image"
-        />
-        <meta
-          property="og:url"
-          content="https://www.papermark.com"
-          key="og-url"
-        />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@papermarkio" />
@@ -63,11 +53,6 @@ export default function App({
           name="twitter:description"
           content="Papermark is an open-source document sharing alternative to DocSend with built-in analytics."
           key="tw-description"
-        />
-        <meta
-          name="twitter:image"
-          content="https://www.papermark.com/_static/meta-image.png"
-          key="tw-image"
         />
         <link rel="icon" href="/favicon.ico" key="favicon" />
       </Head>

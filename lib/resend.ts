@@ -15,7 +15,7 @@ import { log, nanoid } from "@/lib/utils";
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST || "mail",
   port: Number(process.env.MAIL_PORT) || 465,
-  secure: false, // use STARTTLS
+  secure: true, // use STARTTLS
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
@@ -68,14 +68,17 @@ export const sendEmail = async ({
     //         : "Marc from Papermark <marc@papermark.io>");
 
   try {
+    if(test)
+      return;
+
     // Test emails go to a dummy address
-    const recipient = test ? "test@papermark.io" : to;
+    const recipient = to;
 
     const message = {
       from: fromAddress,
       to: recipient,
       cc,
-      replyTo: marketing ? "marc@papermark.io" : replyTo,
+      replyTo: replyTo,
       subject,
       html,
       text: plainText,

@@ -140,14 +140,6 @@ const ProfileMenu = ({ className, size }: ProfileMenuProps) => {
                     Need help?
                   </button>
 
-                  <a
-                    href="mailto:support@papermark.io"
-                    className="my-1 flex items-center px-3 py-2 text-sm duration-200 hover:bg-gray-200 dark:hover:bg-muted"
-                  >
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    Contact us
-                  </a>
-
                   <Link
                     onClick={() =>
                       signOut({

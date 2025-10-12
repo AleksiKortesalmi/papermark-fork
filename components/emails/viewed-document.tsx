@@ -55,19 +55,6 @@ export default function ViewedDocument({
               ) : null}{" "}
               from the link <span className="font-semibold">{linkName}</span>.
             </Text>
-            <Text className="text-sm leading-6 text-black">
-              You can get the detailed engagement insights like time-spent per
-              page and total duration for this document on Papermark.
-            </Text>
-            <Section className="my-8 text-center">
-              <Button
-                className="rounded bg-black text-center text-xs font-semibold text-white no-underline"
-                href={`https://app.papermark.com/documents/${documentId}`}
-                style={{ padding: "12px 20px" }}
-              >
-                See my document insights
-              </Button>
-            </Section>
             <Footer
               footerText={
                 <>
