@@ -30,15 +30,15 @@ export default async function AppMiddleware(req: NextRequest) {
   }
 
   // AUTHENTICATED if the user was created in the last 10 seconds, redirect to "/welcome"
-  if (
-    token?.email &&
-    token?.user?.createdAt &&
-    new Date(token?.user?.createdAt).getTime() > Date.now() - 10000 &&
-    path !== "/welcome" &&
-    !isInvited
-  ) {
-    return NextResponse.redirect(new URL("/welcome", req.url));
-  }
+  // if (
+  //   token?.email &&
+  //   token?.user?.createdAt &&
+  //   new Date(token?.user?.createdAt).getTime() > Date.now() - 10000 &&
+  //   path !== "/welcome" &&
+  //   !isInvited
+  // ) {
+  //   return NextResponse.redirect(new URL("/welcome", req.url));
+  // }
 
   // AUTHENTICATED if the path is /login, redirect to "/dashboard"
   if (token?.email && path === "/login") {
