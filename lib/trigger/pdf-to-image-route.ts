@@ -1,8 +1,12 @@
-import { logger, task } from "@trigger.dev/sdk/v3";
-
 import { getFile } from "@/lib/files/get-file";
 import prisma from "@/lib/prisma";
 import { updateStatus } from "@/lib/utils/generate-trigger-status";
+
+// Simple console-based logger to replace Trigger.dev logger
+const logger = {
+  info: (msg: string, data?: any) => console.log("[INFO]", msg, data ?? ""),
+  error: (msg: string, data?: any) => console.error("[ERROR]", msg, data ?? ""),
+};
 
 type ConvertPdfToImagePayload = {
   documentId: string;
@@ -11,9 +15,7 @@ type ConvertPdfToImagePayload = {
   versionNumber?: number;
 };
 
-export const convertPdfToImageRoute = task({
-  id: "convert-pdf-to-image-route",
-  run: async (payload: ConvertPdfToImagePayload) => {
+export async function convertPdfToImageRoute(payload: ConvertPdfToImagePayload) {
     const { documentVersionId, teamId, documentId, versionNumber } = payload;
 
     updateStatus({ progress: 0, text: "Initializing..." });
@@ -228,5 +230,4 @@ export const convertPdfToImageRoute = task({
       message: "Successfully converted PDF to images",
       totalPages: numPages,
     };
-  },
-});
+  }

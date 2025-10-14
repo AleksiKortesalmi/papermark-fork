@@ -5,8 +5,8 @@ import { copyFileToBucketServer } from "@/lib/files/copy-file-to-bucket-server";
 import notion from "@/lib/notion";
 import { getNotionPageIdFromSlug } from "@/lib/notion/utils";
 import prisma from "@/lib/prisma";
-import { convertCadToPdfTask } from "@/lib/trigger/convert-files";
-import { convertFilesToPdfTask } from "@/lib/trigger/convert-files";
+import { convertCadToPdf } from "@/lib/trigger/convert-files";
+import { convertFilesToPdf } from "@/lib/trigger/convert-files";
 import { processVideo } from "@/lib/trigger/optimize-video-files";
 import { convertPdfToImageRoute } from "@/lib/trigger/pdf-to-image-route";
 import { getExtension } from "@/lib/utils";
@@ -132,84 +132,44 @@ export const processDocument = async ({
 
   // Trigger appropriate conversion tasks based on document type
   if (type === "docs" || type === "slides") {
-    await convertFilesToPdfTask.trigger(
+    await convertFilesToPdf(
       {
         documentId: document.id,
         documentVersionId: document.versions[0].id,
         teamId,
-      },
-      {
-        idempotencyKey: `${teamId}-${document.versions[0].id}-docs`,
-        tags: [
-          `team_${teamId}`,
-          `document_${document.id}`,
-          `version:${document.versions[0].id}`,
-        ],
-        queue: conversionQueue(teamPlan),
-        concurrencyKey: teamId,
-      },
+      }
     );
   }
 
   if (type === "cad") {
-    await convertCadToPdfTask.trigger(
+    await convertCadToPdf(
       {
         documentId: document.id,
         documentVersionId: document.versions[0].id,
         teamId,
-      },
-      {
-        idempotencyKey: `${teamId}-${document.versions[0].id}-cad`,
-        tags: [
-          `team_${teamId}`,
-          `document_${document.id}`,
-          `version:${document.versions[0].id}`,
-        ],
-        queue: conversionQueue(teamPlan),
-        concurrencyKey: teamId,
-      },
+      }
     );
   }
 
   if (type === "video" && contentType !== "video/mp4" && contentType?.startsWith("video/")) {
-    await processVideo.trigger(
+    await processVideo(
       {
         videoUrl: key,
         teamId,
         docId: key.split("/")[1], // Extract doc_xxxx from teamId/doc_xxxx/filename
         documentVersionId: document.versions[0].id,
         fileSize: fileSize || 0,
-      },
-      {
-        idempotencyKey: `${teamId}-${document.versions[0].id}`,
-        tags: [
-          `team_${teamId}`,
-          `document_${document.id}`,
-          `version:${document.versions[0].id}`,
-        ],
-        queue: conversionQueue(teamPlan),
-        concurrencyKey: teamId,
-      },
+      }
     );
   }
 
   // skip triggering convert-pdf-to-image job for "notion" / "excel" documents
   if (type === "pdf") {
-    await convertPdfToImageRoute.trigger(
+    await convertPdfToImageRoute(
       {
         documentId: document.id,
         documentVersionId: document.versions[0].id,
         teamId,
-      },
-      {
-        idempotencyKey: `${teamId}-${document.versions[0].id}`,
-        tags: [
-          `team_${teamId}`,
-          `document_${document.id}`,
-          `version:${document.versions[0].id}`,
-        ],
-        queue: conversionQueue(teamPlan),
-        concurrencyKey: teamId,
       },
     );
   }

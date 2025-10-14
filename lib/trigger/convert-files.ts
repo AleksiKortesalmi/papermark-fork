@@ -14,13 +14,7 @@ export type ConvertPayload = {
   teamId: string;
 };
 
-export const convertFilesToPdfTask = task({
-  id: "convert-files-to-pdf",
-  retry: { maxAttempts: 3 },
-  queue: {
-    concurrencyLimit: 10,
-  },
-  run: async (payload: ConvertPayload) => {
+export async function convertFilesToPdf(payload: ConvertPayload) {
     updateStatus({ progress: 0, text: "Initializing..." });
 
     const team = await prisma.team.findUnique({
@@ -175,21 +169,13 @@ export const convertFilesToPdfTask = task({
 
     updateStatus({ progress: 40, text: "Initiating document processing..." });
 
-    await convertPdfToImageRoute.trigger(
+    await convertPdfToImageRoute(
       {
         documentId: payload.documentId,
         documentVersionId: payload.documentVersionId,
         teamId: payload.teamId,
         versionNumber: versionNumber,
-      },
-      {
-        idempotencyKey: `${payload.teamId}-${payload.documentVersionId}`,
-        tags: [
-          `team_${payload.teamId}`,
-          `document_${payload.documentId}`,
-          `version:${payload.documentVersionId}`,
-        ],
-      },
+      }
     );
 
     logger.info("Document converted", {
@@ -199,17 +185,10 @@ export const convertFilesToPdfTask = task({
       docId: docId,
     });
     return;
-  },
-});
+  }
 
 // convert cad file to pdf
-export const convertCadToPdfTask = task({
-  id: "convert-cad-to-pdf",
-  retry: { maxAttempts: 3 },
-  queue: {
-    concurrencyLimit: 2,
-  },
-  run: async (payload: ConvertPayload) => {
+export async function convertCadToPdf(payload: ConvertPayload) {
     const team = await prisma.team.findUnique({
       where: {
         id: payload.teamId,
@@ -362,20 +341,12 @@ export const convertCadToPdfTask = task({
       },
     });
 
-    await convertPdfToImageRoute.trigger(
+    await convertPdfToImageRoute(
       {
         documentId: payload.documentId,
         documentVersionId: payload.documentVersionId,
         teamId: payload.teamId,
-      },
-      {
-        idempotencyKey: `${payload.teamId}-${payload.documentVersionId}`,
-        tags: [
-          `team_${payload.teamId}`,
-          `document_${payload.documentId}`,
-          `version:${payload.documentVersionId}`,
-        ],
-      },
+      }
     );
 
     logger.info("Document converted", {
@@ -385,5 +356,4 @@ export const convertCadToPdfTask = task({
       docId: docId,
     });
     return;
-  },
-});
+  }

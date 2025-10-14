@@ -11,18 +11,13 @@ import { getFile } from "@/lib/files/get-file";
 import { streamFileServer } from "@/lib/files/stream-file-server";
 import prisma from "@/lib/prisma";
 
-export const processVideo = task({
-  id: "process-video",
-  machine: {
-    preset: "medium-1x",
-  },
-  run: async (payload: {
+export async function processVideo(payload: {
     videoUrl: string;
     teamId: string;
     docId: string;
     documentVersionId: string;
     fileSize: number;
-  }) => {
+  }) {
     const { videoUrl, teamId, docId, documentVersionId, fileSize } = payload;
 
     try {
@@ -226,5 +221,4 @@ export const processVideo = task({
       });
       throw error;
     }
-  },
-});
+  }
