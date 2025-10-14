@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth/next";
 
 import prisma from "@/lib/prisma";
 import { jobStore } from "@/lib/redis-job-store";
-import { exportVisitsTask } from "@/lib/trigger/export-visits";
+import { exportVisits } from "@/lib/trigger/export-visits";
 import { CustomUser } from "@/lib/types";
 
 export default async function handler(
@@ -124,23 +124,19 @@ export default async function handler(
     });
 
     // Trigger the background task
-    const handle = await exportVisitsTask.trigger(
+    const handle = await exportVisits(
       {
         type: "document",
         teamId,
         resourceId: docId,
         userId,
         exportId: exportJob.id,
-      },
-      {
-        idempotencyKey: exportJob.id,
-        tags: [`team_${teamId}`, `user_${userId}`, `export_${exportJob.id}`],
-      },
+      }
     );
 
     // Update the job with the trigger run ID for cancellation
     const updatedJob = await jobStore.updateJob(exportJob.id, {
-      triggerRunId: handle.id,
+      triggerRunId: "handle.id",
     });
 
     return res.status(200).json({

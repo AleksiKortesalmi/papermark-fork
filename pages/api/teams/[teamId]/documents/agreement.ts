@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth/next";
 import { errorhandler } from "@/lib/errorHandler";
 import prisma from "@/lib/prisma";
 import { getTeamWithUsersAndDocument } from "@/lib/team/helper";
-import { convertFilesToPdfTask } from "@/lib/trigger/convert-files";
+import { convertFilesToPdf } from "@/lib/trigger/convert-files";
 import { convertPdfToImageRoute } from "@/lib/trigger/pdf-to-image-route";
 import { CustomUser } from "@/lib/types";
 import { getExtension, log, serializeFileSize } from "@/lib/utils";
@@ -122,43 +122,23 @@ export default async function handle(
       });
 
       if (type === "docs") {
-        await convertFilesToPdfTask.trigger(
+        await convertFilesToPdf(
           {
             documentId: document.id,
             documentVersionId: document.versions[0].id,
             teamId,
-          },
-          {
-            idempotencyKey: `${teamId}-${document.versions[0].id}-docs`,
-            tags: [
-              `team_${teamId}`,
-              `document_${document.id}`,
-              `version:${document.versions[0].id}`,
-            ],
-            queue: conversionQueue(team.plan),
-            concurrencyKey: teamId,
-          },
+          }
         );
       }
 
       if (type === "pdf") {
-        await convertPdfToImageRoute.trigger(
+        await convertPdfToImageRoute(
           {
             documentId: document.id,
             documentVersionId: document.versions[0].id,
             teamId,
             // docId: fileUrl.split("/")[1],
-          },
-          {
-            idempotencyKey: `${teamId}-${document.versions[0].id}`,
-            tags: [
-              `team_${teamId}`,
-              `document_${document.id}`,
-              `version:${document.versions[0].id}`,
-            ],
-            queue: conversionQueue(team.plan),
-            concurrencyKey: teamId,
-          },
+          }
         );
       }
 

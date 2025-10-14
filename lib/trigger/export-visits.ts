@@ -52,11 +52,7 @@ export type ExportVisitsPayload = {
   exportId: string; // unique identifier for this export job
 };
 
-export const exportVisitsTask = task({
-  id: "export-visits",
-  retry: { maxAttempts: 3 },
-  maxDuration: 900, // 15 minutes to handle large datasets
-  run: async (payload: ExportVisitsPayload) => {
+export async function exportVisits(payload: ExportVisitsPayload) {
     const { type, teamId, resourceId, groupId, userId, exportId } = payload;
 
     logger.info("Starting export visits task", { payload });
@@ -174,8 +170,7 @@ export const exportVisitsTask = task({
 
       throw error;
     }
-  },
-});
+  }
 
 async function exportDocumentVisits(
   docId: string,
