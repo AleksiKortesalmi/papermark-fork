@@ -1,6 +1,9 @@
 import { getFile } from "@/lib/files/get-file";
 import prisma from "@/lib/prisma";
-import { updateStatus } from "@/lib/utils/generate-trigger-status";
+
+export function updateStatus(status: { progress: number; text: string }) {
+  console.log(`[Status] ${status.progress}% - ${status.text}`);
+}
 
 // Simple console-based logger to replace Trigger.dev logger
 const logger = {
