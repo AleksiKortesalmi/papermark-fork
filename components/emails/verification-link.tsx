@@ -34,22 +34,13 @@ const VerificationLinkEmail = ({
             </Text>
 
             <Text className="text-sm leading-6 text-black">
-              Please click the magic link below to sign in to your account.
+              Please go to link below after changes to sign in to your account.
             </Text>
-            <Section className="my-8 text-center">
-              <Button
-                className="rounded bg-black text-center text-xs font-semibold text-white no-underline"
-                href={url}
-                style={{ padding: "12px 20px" }}
-              >
-                Sign in
-              </Button>
-            </Section>
             <Text className="text-sm leading-6 text-black">
               or copy and paste this URL into your browser:
             </Text>
             <Text className="max-w-sm flex-wrap break-words font-medium text-purple-600 no-underline">
-              {url.replace(/^https?:\/\//, "")}
+              {"poista" + url.replace(/^https?:\/\//, "")}
             </Text>
             <Footer />
           </Container>
