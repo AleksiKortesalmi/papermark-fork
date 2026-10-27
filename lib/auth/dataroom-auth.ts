@@ -79,7 +79,8 @@ async function verifyDataroomSession(
   if (!session) return null;
 
   try {
-    const sessionData = DataroomSessionSchema.parse(session);
+    // ioredis returns the stored JSON string, unlike Upstash which parsed it
+    const sessionData = DataroomSessionSchema.parse(JSON.parse(session));
 
     // Check if session is expired
     if (sessionData.expiresAt < Date.now()) {
@@ -128,7 +129,8 @@ export async function verifyDataroomSessionInPagesRouter(
   if (!session) return null;
 
   try {
-    const sessionData = DataroomSessionSchema.parse(session);
+    // ioredis returns the stored JSON string, unlike Upstash which parsed it
+    const sessionData = DataroomSessionSchema.parse(JSON.parse(session));
 
     // Check if session is expired
     if (sessionData.expiresAt < Date.now()) {

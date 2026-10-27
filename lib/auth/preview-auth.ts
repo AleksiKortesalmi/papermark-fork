@@ -54,7 +54,8 @@ async function verifyPreviewSession(
   if (!session) return null;
 
   try {
-    const sessionData = ZPreviewSessionSchema.parse(session);
+    // ioredis returns the stored JSON string, unlike Upstash which parsed it
+    const sessionData = ZPreviewSessionSchema.parse(JSON.parse(session));
 
     // Check if the session is for the correct user
     if (sessionData.userId !== userId) {
