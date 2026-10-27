@@ -1,9 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { InvocationType, InvokeCommand } from "@aws-sdk/client-lambda";
 import { ItemType, ViewType } from "@prisma/client";
 
-import { getStorageConfig, getLambdaClientForTeam, getLambdaConfig } from "@/lib/files/aws-client";
+import { createZipDownloadUrl } from "@/lib/files/create-zip-download";
 import prisma from "@/lib/prisma";
 import { getIpAddress } from "@/lib/utils/ip";
 
@@ -46,6 +45,7 @@ export default async function handle(
           dataroom: {
             select: {
               id: true,
+              name: true,
               teamId: true,
               allowBulkDownload: true,
               folders: {
@@ -303,23 +303,13 @@ export default async function handle(
         return res.status(404).json({ error: "No files to download" });
       }
       
-      // Get team-specific storage configuration
-      const teamId = view.dataroom!.teamId;
-      const [client, storageConfig] = await Promise.all([
-        getLambdaClientForTeam(teamId),
-        getLambdaConfig(),
-      ]);
-
-      const params = {
-        FunctionName: process.env.NEXT_PRIVATE_LAMBDA_FUNCTION_NAME, // This might break something IDK
-        InvocationType: InvocationType.RequestResponse,
-        Payload: JSON.stringify({
-          sourceBucket: process.env.S3_BUCKET!,
-          fileKeys: fileKeys,
-          folderStructure: folderStructure,
-          watermarkConfig: view.link.enableWatermark
+      try {
+        const downloadUrl = await createZipDownloadUrl({
+          teamId: view.dataroom.teamId,
+          zipName: view.dataroom.name,
+          folderStructure,
+          watermark: view.link.enableWatermark
             ? {
-                enabled: true,
                 config: view.link.watermarkConfig,
                 viewerData: {
                   email: view.viewerEmail,
@@ -335,36 +325,17 @@ export default async function handle(
                   ipAddress: getIpAddress(req.headers),
                 },
               }
-            : { enabled: false },
-        }),
-      };
-
-      try {
-        const command = new InvokeCommand(params);
-        const response = await client.send(command);
-
-        if (response.Payload) {
-          const decodedPayload = new TextDecoder().decode(response.Payload);
-
-          const payload = JSON.parse(decodedPayload);
-          const { downloadUrl } = JSON.parse(payload.body);
-
-          res.status(200).json({ downloadUrl });
-        } else {
-          throw new Error("Payload is undefined or empty");
-        }
-      } catch (error) {
-        console.error("Error invoking Lambda:", error);
-        res.status(500).json({
-          error: "Failed to generate download link",
-          details: (error as Error).message,
+            : undefined,
         });
+
+        res.status(200).json({ downloadUrl });
+      } catch (error) {
+        console.error("Error creating zip:", error);
+        res.status(500).json({ error: "Failed to generate download link" });
       }
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal Server Error",
-        error: (error as Error).message,
-      });
+      console.error("Bulk download error:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {
     // We only allow POST requests

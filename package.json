@@ -99,6 +99,7 @@
     "ioredis": "^5.8.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.543.0",
     "mime-types": "^3.0.1",
     "motion": "^12.23.12",

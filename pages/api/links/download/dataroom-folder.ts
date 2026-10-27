@@ -1,10 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { InvocationType, InvokeCommand } from "@aws-sdk/client-lambda";
 import { ItemType, ViewType } from "@prisma/client";
 import slugify from "@sindresorhus/slugify";
 
-import { getLambdaClientForTeam, getStorageConfig } from "@/lib/files/aws-client";
+import { createZipDownloadUrl } from "@/lib/files/create-zip-download";
 import prisma from "@/lib/prisma";
 import { getIpAddress } from "@/lib/utils/ip";
 
@@ -57,6 +56,7 @@ export default async function handler(
           },
         },
         groupId: true,
+        dataroomId: true,
       },
     });
 
@@ -85,6 +85,11 @@ export default async function handler(
       view.viewedAt &&
       view.viewedAt < new Date(Date.now() - 23 * 60 * 60 * 1000)
     ) {
+      return res.status(403).json({ error: "Error downloading" });
+    }
+
+    // the requested folder must belong to the dataroom this view is for
+    if (!dataroomId || view.dataroomId !== dataroomId) {
       return res.status(403).json({ error: "Error downloading" });
     }
 
@@ -294,53 +299,31 @@ export default async function handler(
       };
     }
 
-    // Get team-specific storage configuration
-    const [client, bucket] = await Promise.all([
-      getLambdaClientForTeam(view.link.teamId!),
-      getStorageConfig(),
-    ]);
-
-    const params = {
-      FunctionName: `bulk-download-zip-creator-${process.env.NODE_ENV === "development" ? "dev" : "prod"}`,
-      InvocationType: InvocationType.RequestResponse,
-      Payload: JSON.stringify({
-        sourceBucket: bucket,
-        fileKeys,
-        folderStructure,
-        watermarkConfig: view.link.enableWatermark
-          ? {
-              enabled: true,
-              config: view.link.watermarkConfig,
-              viewerData: {
-                email: view.viewerEmail,
-                date: new Date(
-                  view.viewedAt ? view.viewedAt : new Date(),
-                ).toLocaleDateString(),
-                time: new Date(
-                  view.viewedAt ? view.viewedAt : new Date(),
-                ).toLocaleTimeString(),
-                link: view.link.name,
-                ipAddress: getIpAddress(req.headers),
-              },
-            }
-          : { enabled: false },
-      }),
-    };
-
-    const command = new InvokeCommand(params);
-    const response = await client.send(command);
-
-    if (!response.Payload) throw new Error("Lambda returned empty payload");
-
-    const parsed = JSON.parse(new TextDecoder().decode(response.Payload));
-    const { downloadUrl } = JSON.parse(parsed.body);
+    const downloadUrl = await createZipDownloadUrl({
+      teamId: view.link.teamId!,
+      zipName: rootFolder.name,
+      folderStructure,
+      watermark: view.link.enableWatermark
+        ? {
+            config: view.link.watermarkConfig,
+            viewerData: {
+              email: view.viewerEmail,
+              date: new Date(
+                view.viewedAt ? view.viewedAt : new Date(),
+              ).toLocaleDateString(),
+              time: new Date(
+                view.viewedAt ? view.viewedAt : new Date(),
+              ).toLocaleTimeString(),
+              link: view.link.name,
+              ipAddress: getIpAddress(req.headers),
+            },
+          }
+        : undefined,
+    });
 
     res.status(200).json({ downloadUrl });
   } catch (error) {
     console.error("Download error:", error);
-    return res.status(500).json({
-      message: "Internal Server Error",
-      error: (error as Error).message,
-    });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 }

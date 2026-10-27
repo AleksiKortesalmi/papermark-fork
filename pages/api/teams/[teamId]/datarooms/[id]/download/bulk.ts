@@ -1,10 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { InvocationType, InvokeCommand } from "@aws-sdk/client-lambda";
 import { getServerSession } from "next-auth";
 
-import { getLambdaClientForTeam, getTeamS3ClientAndConfig } from "@/lib/files/aws-client";
+import { createZipDownloadUrl } from "@/lib/files/create-zip-download";
 import prisma from "@/lib/prisma";
 import { CustomUser } from "@/lib/types";
 
@@ -52,6 +51,7 @@ export default async function handler(
           teamId: teamId,
         },
         select: {
+          name: true,
           folders: {
             select: {
               id: true,
@@ -176,36 +176,16 @@ export default async function handler(
         }
       });
 
-      // Get team-specific Lambda client and storage config
-      const client = await getLambdaClientForTeam(teamId);
-      const {config, bucket } = await getTeamS3ClientAndConfig(teamId);
-
-      const params = {
-        FunctionName: process.env.NEXT_PRIVATE_LAMBDA_FUNCTION_NAME, // This might break something IDK
-        InvocationType: InvocationType.RequestResponse,
-        Payload: JSON.stringify({
-          sourceBucket: bucket,
-          fileKeys: fileKeys,
-          folderStructure: folderStructure,
-        }),
-      };
-
       try {
-        const command = new InvokeCommand(params);
-        const response = await client.send(command);
+        const downloadUrl = await createZipDownloadUrl({
+          teamId,
+          zipName: dataroom.name,
+          folderStructure,
+        });
 
-        if (response.Payload) {
-          const decodedPayload = new TextDecoder().decode(response.Payload);
-
-          const payload = JSON.parse(decodedPayload);
-          const { downloadUrl } = JSON.parse(payload.body);
-
-          res.status(200).json({ downloadUrl });
-        } else {
-          throw new Error("Payload is undefined or empty");
-        }
+        res.status(200).json({ downloadUrl });
       } catch (error) {
-        console.error("Error invoking Lambda:", error);
+        console.error("Error creating zip:", error);
         res.status(500).json({
           error: "Failed to generate download link",
           details: (error as Error).message,
